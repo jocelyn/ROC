@@ -45,14 +45,14 @@ feature -- Functionality Store Procedures
 	execute_store_reader
 			-- Execute a `store' to read data.
 		require
-			store_not_void: store /= void
+			store_not_void: store /= Void
 		deferred
 		end
 
 	execute_store_writer
 			-- Execute a `store' to write data.
 		require
-			store_not_void: store /= void
+			store_not_void: store /= Void
 		deferred
 		end
 
@@ -61,14 +61,14 @@ feature -- SQL Queries
 	execute_query
 			-- Execute sql query, the read data from the database.
 		require
-			query_not_void: query /= void
+			query_not_void: query /= Void
 		deferred
 		end
 
 	execute_change
 			-- Execute sql query that update/add data.
 		require
-			query_not_void: query /= void
+			query_not_void: query /= Void
 		deferred
 		end
 

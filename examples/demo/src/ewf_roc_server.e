@@ -147,6 +147,8 @@ feature -- CMS setup
 			debug ("refactor_fixme")
 				to_implement ("To implement custom storage")
 			end
+			a_setup.storage_drivers.force (create {CMS_STORAGE_MYSQL_BUILDER}.make, "mysql")
 		end
+
 end
 
