@@ -147,6 +147,8 @@ feature -- Change: Node
 				 	l_author.id > 0
 				then
 					l_parameters.put (l_author.id, "author_id")
+				else
+					l_parameters.put (0, "author_id")
 				end
 				sql_change (sql_insert_node, l_parameters)
 				a_node.set_id (last_inserted_node_id)
