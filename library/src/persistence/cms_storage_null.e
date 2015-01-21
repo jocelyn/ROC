@@ -7,13 +7,13 @@ class
 	CMS_STORAGE_NULL
 
 inherit
-
 	CMS_STORAGE
 		redefine
 			default_create
 		select
 			default_create
 		end
+
 	REFACTORING_HELPER
 		rename
 			default_create as default_create_rh
@@ -70,8 +70,13 @@ feature -- User Nodes
 
 feature -- Change: user
 
-	save_user (a_user: CMS_USER)
+	new_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
+		do
+		end
+
+	update_user (a_user: CMS_USER)
+			-- Update user `a_user'.
 		do
 		end
 
@@ -93,8 +98,12 @@ feature -- Change: roles and permissions
 		do
 		end
 
-
 feature -- Access: node
+
+	nodes_count: INTEGER_64
+			-- Count of nodes.
+		do
+		end
 
 	nodes: LIST[CMS_NODE]
 			-- List of nodes.
@@ -153,13 +162,6 @@ feature -- Node
 
 	update_node_content (a_user_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
 			-- <Precursor>
-		do
-		end
-
-feature -- User
-
-	new_user (a_user: CMS_USER)
-			-- Add a new user `a_user'.
 		do
 		end
 

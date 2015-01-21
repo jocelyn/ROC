@@ -16,7 +16,19 @@ inherit
 
 	SHARED_LOGGER
 
-feature -- Access		
+feature -- Access	
+
+	nodes_count: INTEGER_64
+			-- Number of items nodes.
+		do
+			error_handler.reset
+			log.write_information (generator + ".nodes_count")
+			sql_query (select_nodes_count, Void)
+			if sql_rows_count = 1 then
+				Result := sql_read_integer_64 (1)
+			end
+			sql_post_execution
+		end
 
 	nodes: LIST [CMS_NODE]
 			-- List of nodes.
@@ -29,6 +41,7 @@ feature -- Access
 			from
 				sql_query (select_nodes, Void)
 				sql_post_execution
+				sql_start
 			until
 				sql_after
 			loop
@@ -56,6 +69,7 @@ feature -- Access
 				l_parameters.put (a_lower, "offset")
 				sql_query (select_recent_nodes, l_parameters)
 				sql_post_execution
+				sql_start
 			until
 				sql_after
 			loop
@@ -99,18 +113,6 @@ feature -- Access
 			sql_post_execution
 		end
 
-	nodes_count: INTEGER
-			-- Number of items nodes.
-		do
-			error_handler.reset
-			log.write_information (generator + ".nodes_count")
-			sql_query (select_nodes_count, Void)
-			if sql_rows_count = 1 then
-				Result := sql_read_integer_32 (1)
-			end
-			sql_post_execution
-		end
-
 	last_inserted_node_id: INTEGER_64
 			-- Last insert node id.
 		do
@@ -137,16 +139,16 @@ feature -- Change: Node
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
 			l_parameters.put (a_node.content, "content")
-			l_parameters.put (a_node.publication_date, "publication_date")
-			l_parameters.put (a_node.creation_date, "creation_date")
-			l_parameters.put (a_node.modification_date, "modification_date")
+			l_parameters.put (a_node.publication_date, "publish")
+			l_parameters.put (a_node.creation_date, "created")
+			l_parameters.put (a_node.modification_date, "changed")
 			if
 				attached a_node.author as l_author and then
 			 	l_author.id > 0
 			then
-				l_parameters.put (l_author.id, "author_id")
+				l_parameters.put (l_author.id, "author")
 			else
-				l_parameters.put (0, "author_id")
+				l_parameters.put (0, "author")
 			end
 			sql_change (sql_insert_node, l_parameters)
 			sql_post_execution
@@ -168,35 +170,34 @@ feature -- Change: Node
 			l_parameters.put (a_id, "id")
 			sql_change (sql_delete_node, l_parameters)
 			sql_post_execution
-
-				-- Delete from user nodes.  FIXME: what is that ???
-			sql_change (sql_delete_from_user_node, l_parameters)
-			sql_post_execution
 		end
 
 	update_node (a_node: CMS_NODE)
 			-- Update node content `a_node'.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
+			now: DATE_TIME
 		do
+			create now.make_now_utc
 			error_handler.reset
 			log.write_information (generator + ".update_node")
 			create l_parameters.make (7)
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
 			l_parameters.put (a_node.content, "content")
-			l_parameters.put (a_node.publication_date, "publication_date")
-			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
+			l_parameters.put (a_node.publication_date, "publish")
+			l_parameters.put (now, "changed")
 			l_parameters.put (a_node.id, "id")
 			if attached a_node.author as l_author then
-				l_parameters.put (l_author.id, "id")
-				l_parameters.put (l_author.id, "editor")
+				l_parameters.put (l_author.id, "author")
 			else
-				l_parameters.put (0, "id")
-				l_parameters.put (0, "editor")
+				l_parameters.put (0, "author")
 			end
 			sql_change (sql_update_node, l_parameters)
 			sql_post_execution
+			if not error_handler.has_error then
+				a_node.set_modification_date (now)
+			end
 		end
 
 	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
@@ -210,8 +211,8 @@ feature -- Change: Node
 			log.write_information (generator + ".update_node_title")
 			create l_parameters.make (3)
 			l_parameters.put (a_title, "title")
-			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
-			l_parameters.put (a_node_id, "id")
+			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
+			l_parameters.put (a_node_id, "nid")
 			sql_change (sql_update_node_title, l_parameters)
 			sql_post_execution
 		end
@@ -227,8 +228,8 @@ feature -- Change: Node
 			log.write_information (generator + ".update_node_summary")
 			create l_parameters.make (3)
 			l_parameters.put (a_summary, "summary")
-			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
-			l_parameters.put (a_node_id, "id")
+			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
+			l_parameters.put (a_node_id, "nid")
 			sql_change (sql_update_node_summary, l_parameters)
 			sql_post_execution
 		end
@@ -244,8 +245,8 @@ feature -- Change: Node
 			log.write_information (generator + ".update_node_content")
 			create l_parameters.make (3)
 			l_parameters.put (a_content, "content")
-			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
-			l_parameters.put (a_node_id, "id")
+			l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
+			l_parameters.put (a_node_id, "nid")
 			sql_change (sql_update_node_content, l_parameters)
 			sql_post_execution
 		end
@@ -257,49 +258,36 @@ feature {NONE} -- Queries
 	Select_nodes: STRING = "select * from Nodes;"
 		-- SQL Query to retrieve all nodes.
 
-	Select_node_by_id: STRING = "select * from Nodes where id =:id order by id desc, publication_date desc;"
+	Select_node_by_id: STRING = "select * from Nodes where nid =:nid order by nid desc, publish desc;"
 
-	Select_recent_nodes: STRING = "select * from Nodes order by id desc, publication_date desc LIMIT :rows OFFSET :offset ;"
+	Select_recent_nodes: STRING = "select * from Nodes order by nid desc, publish desc LIMIT :rows OFFSET :offset ;"
 
-	SQL_Insert_node: STRING = "insert into nodes (title, summary, content, publication_date, creation_date, modification_date, author_id) values (:title, :summary, :content, :publication_date, :creation_date, :modification_date, :author_id);"
+	SQL_Insert_node: STRING = "insert into nodes (title, summary, content, publish, created, changed, author) values (:title, :summary, :content, :publish, :created, :changed, :author);"
 		-- SQL Insert to add a new node.
 
-	SQL_Update_node_title: STRING ="update nodes SET title=:title, modification_date=:modification_date, version = version + 1 where id=:id;"
-		-- SQL update node title.
-
-	SQL_Update_node_summary: STRING ="update nodes SET summary=:summary, modification_date=:modification_date, version = version + 1 where id=:id;"
-		-- SQL update node summary.
-
-	SQL_Update_node_content: STRING ="update nodes SET content=:content, modification_date=:modification_date, version = version + 1 where id=:id;"
-		-- SQL node content.
-
-	Slq_update_editor: STRING ="update nodes SET editor_id=:users_id  where id=:nodes_id;"
-		-- SQL node content.	
-
-	SQL_Update_node : STRING = "update nodes SET title=:title, summary=:summary, content=:content, publication_date=:publication_date,  modification_date=:modification_date, version = version + 1, editor_id=:editor where id=:id;"
+	SQL_Update_node : STRING = "update nodes SET title=:title, summary=:summary, content=:content, publish=:publish,  changed=:changed, version = version + 1, author=:author where nid=:nid;"
 		-- SQL node.
 
-	SQL_Delete_node: STRING = "delete from nodes where id=:id;"
+	SQL_Delete_node: STRING = "delete from nodes where nid=:nid;"
 
-	Sql_update_node_author: STRING  = "update nodes SET author_id=:user_id where id=:id;"
+	Sql_update_node_author: STRING  = "update nodes SET author=:author where nid=:nid;"
 
-	Sql_last_insert_node_id: STRING = "SELECT MAX(id) from nodes;"
+	SQL_Update_node_title: STRING ="update nodes SET title=:title, changed=:changed, version = version + 1 where nid=:nid;"
+		-- SQL update node title.
+
+	SQL_Update_node_summary: STRING ="update nodes SET summary=:summary, changed=:changed, version = version + 1 where nid=:nid;"
+		-- SQL update node summary.
+
+	SQL_Update_node_content: STRING ="update nodes SET content=:content, changed=:changed, version = version + 1 where nid=:nid;"
+		-- SQL node content.
+
+	Sql_last_insert_node_id: STRING = "SELECT MAX(nid) from nodes;"
 
 feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 
-	Sql_insert_users_nodes: STRING = "insert into users_nodes (users_id, nodes_id) values (:users_id, :nodes_id);"
+	Select_user_author: STRING = "SELECT * FROM Nodes INNER JOIN users ON nodes.author=users.uid and users.uid = :uid;"
 
-	select_node_collaborators:  STRING = "SELECT * FROM Users INNER JOIN users_nodes ON users.id=users_nodes.users_id and users_nodes.nodes_id = :node_id;"
-
-	Select_user_author: STRING = "SELECT * FROM Nodes INNER JOIN users ON nodes.author_id=users.id and users.id = :user_id;"
-
-	Select_node_author: STRING = "SELECT * FROM Users INNER JOIN nodes ON nodes.author_id=users.id and nodes.id =:node_id;"
-
-	Select_user_collaborator: STRING = "SELECT * FROM Nodes INNER JOIN users_nodes ON users_nodes.nodes_id = nodes.id and users_nodes.users_id = :user_id;"
-
-	Select_exist_user_node: STRING= "Select Count(*) from Users_nodes where users_id=:user_id and nodes_id=:node_id;"
-
-	sql_delete_from_user_node: STRING = "delete from users_nodes where nodes_id=:id"
+	Select_node_author: STRING = "SELECT * FROM Users INNER JOIN nodes ON nodes.author=users.uid and nodes.nid =:nid;"
 
 feature {NONE} -- Implementation
 
@@ -309,23 +297,26 @@ feature {NONE} -- Implementation
 			if attached sql_read_integer_64 (1) as l_id then
 				Result.set_id (l_id)
 			end
-			if attached sql_read_date_time (2) as l_publication_date then
-				Result.set_publication_date (l_publication_date)
-			end
-			if attached sql_read_date_time (3) as l_creation_date then
-				Result.set_creation_date (l_creation_date)
-			end
-			if attached sql_read_date_time (4) as l_modif_date then
-				Result.set_modification_date (l_modif_date)
-			end
-			if attached sql_read_string_32 (5) as l_title then
+			if attached sql_read_string_32 (4) as l_title then
 				Result.set_title (l_title)
 			end
-			if attached sql_read_string_32 (6) as l_summary then
+			if attached sql_read_string_32 (5) as l_summary then
 				Result.set_summary (l_summary)
 			end
-			if attached sql_read_string (7) as l_content then
+			if attached sql_read_string (6) as l_content then
 				Result.set_content (l_content)
+			end
+			if attached sql_read_date_time (8) as l_publication_date then
+				Result.set_publication_date (l_publication_date)
+			end
+			if attached sql_read_date_time (9) as l_creation_date then
+				Result.set_creation_date (l_creation_date)
+			end
+			if attached sql_read_date_time (10) as l_modif_date then
+				Result.set_modification_date (l_modif_date)
+			end
+			if attached sql_read_integer_64 (7) as l_author_id then
+				-- access to API ...
 			end
 		end
 

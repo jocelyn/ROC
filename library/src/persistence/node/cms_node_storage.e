@@ -19,6 +19,11 @@ feature -- Error Handling
 
 feature -- Access		
 
+	nodes_count: INTEGER_64
+			-- Count of nodes.
+		deferred
+		end
+
 	nodes: LIST [CMS_NODE]
 			-- List of nodes.
 		deferred
@@ -49,7 +54,7 @@ feature -- Change: Node
 			-- Save node `a_node'.
 		require
 			no_id: not a_node.has_id
-			valid_user: attached a_node.author as l_author implies l_author.id > 0
+			valid_user: attached a_node.author as l_author and then l_author.id > 0
 		deferred
 		end
 

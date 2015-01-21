@@ -88,12 +88,14 @@ feature -- Status Report
 
 feature -- Access: Node
 
+	nodes_count: INTEGER_64
+		do
+			Result := storage.nodes_count
+		end
+
 	nodes: LIST [CMS_NODE]
 			-- List of nodes.
 		do
-			debug ("refactor_fixme")
-				fixme ("Implementation")
-			end
 			Result := storage.nodes
 		end
 
@@ -174,17 +176,28 @@ feature -- Change User
 
 	new_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
+		require
+			no_id: not a_user.has_id
+			no_hashed_password: a_user.hashed_password = Void
 		do
 			if
 				attached a_user.password as l_password and then
 				attached a_user.email as l_email
 			then
-				storage.save_user (a_user)
+				storage.new_user (a_user)
 			else
 				debug ("refactor_fixme")
 					fixme ("Add error")
 				end
 			end
+		end
+
+	update_user (a_user: CMS_USER)
+			-- Update user `a_user'.
+		require
+			has_id: a_user.has_id
+		do
+			storage.update_user (a_user)
 		end
 
 feature -- Helpers

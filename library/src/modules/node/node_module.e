@@ -162,21 +162,23 @@ feature -- Handler
 			l_user: CMS_USER
 			l_node: CMS_NODE
 		do
-			create {NOT_IMPLEMENTED_ERROR_CMS_RESPONSE} r.make (req, res, a_api)
+			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, a_api)
 
 			if attached a_api.user_by_name ("foo") as u then
 				l_user := u
 			else
 				create l_user.make ("foo")
 				l_user.set_password ("foobar#")
-				l_user.set_email ("jfiat@eiffel.com")
+				l_user.set_email ("test@example.com")
 				a_api.new_user (l_user)
 			end
-			create l_node.make ({STRING_32} "This is a content", {STRING_32} "And a summary", {STRING_32} "Nice title")
-			l_node.set_author (l_user)
-			a_api.new_node (l_node)
+			if a_api.nodes_count = 0 then
+				create l_node.make ({STRING_32} "This is a content", {STRING_32} "And a summary", {STRING_32} "Nice title")
+				l_node.set_author (l_user)
+				a_api.new_node (l_node)
+			end
 
-			create s.make_from_string ("<p>Sorry: listing the CMS nodes is not yet implemented.</p>")
+			create s.make_from_string ("<p>Nodes:</p>")
 			if attached a_api.nodes as lst then
 				across
 					lst as ic
@@ -191,7 +193,7 @@ feature -- Handler
 			end
 
 			r.set_main_content (s)
-			r.add_block (create {CMS_CONTENT_BLOCK}.make ("nodes_warning", Void, "/nodes/ is not yet implemented<br/>", Void), "highlighted")
+			r.add_block (create {CMS_CONTENT_BLOCK}.make ("nodes_warning", Void, "/nodes/ is not yet fully implemented<br/>", Void), "highlighted")
 			r.execute
 		end
 

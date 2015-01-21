@@ -36,7 +36,7 @@ feature -- Access
 		deferred
 		ensure
 			same_id: Result /= Void implies Result.id = a_id
-			password: Result /= Void implies Result.password /= Void
+			password: Result /= Void implies (Result.hashed_password /= Void and Result.password = Void)
 		end
 
 	user_by_name (a_name: like {CMS_USER}.name): detachable CMS_USER
@@ -46,7 +46,7 @@ feature -- Access
 		deferred
 		ensure
 			same_name: Result /= Void implies a_name ~ Result.name
-			password: Result /= Void implies Result.password /= Void
+			password: Result /= Void implies (Result.hashed_password /= Void and Result.password = Void)
 		end
 
 	user_by_email (a_email: like {CMS_USER}.email): detachable CMS_USER
@@ -54,7 +54,7 @@ feature -- Access
 		deferred
 		ensure
 			same_email: Result /= Void implies a_email ~ Result.email
-			password: Result /= Void implies Result.password /= Void
+			password: Result /= Void implies (Result.hashed_password /= Void and Result.password = Void)
 		end
 
 	is_valid_credential (a_u, a_p: READABLE_STRING_32): BOOLEAN
@@ -64,8 +64,17 @@ feature -- Access
 
 feature -- Change: user
 
-	save_user (a_user: CMS_USER)
+	new_user (a_user: CMS_USER)
+			-- New user `a_user'.
+		require
+			no_id: not a_user.has_id
+		deferred
+		end
+
+	update_user (a_user: CMS_USER)
 			-- Save user `a_user'.
+		require
+			has_id: a_user.has_id
 		deferred
 		end
 

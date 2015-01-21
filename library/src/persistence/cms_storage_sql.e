@@ -30,6 +30,58 @@ feature -- Execution
 
 feature -- Operation
 
+	check_sql_query_validity (a_sql_statement: READABLE_STRING_8; a_params: detachable STRING_TABLE [detachable ANY])
+		local
+			l_sql_params: STRING_TABLE [READABLE_STRING_8]
+			i,j,n,m: INTEGER
+			s: STRING
+		do
+			create l_sql_params.make_caseless (0)
+			from
+				i := 1
+				n := a_sql_statement.count
+			until
+				i > n
+			loop
+				i := a_sql_statement.index_of (':', i)
+				if i = 0 then
+					i := n -- exit
+				else
+					from
+						j := i + 1
+					until
+						j > n or not (a_sql_statement[j].is_alpha_numeric or a_sql_statement[j] = '_')
+					loop
+						j := j + 1
+					end
+					s := a_sql_statement.substring (i + 1, j - 1)
+					l_sql_params.force (s, s)
+				end
+				i := i + 1
+			end
+			if a_params = Void then
+				if not l_sql_params.is_empty then
+					check False end
+					error_handler.add_custom_error (-1, "invalid query", "missing value for sql parameters")
+				end
+			else
+				across
+					a_params as ic
+				loop
+					if l_sql_params.has (ic.key) then
+						l_sql_params.remove (ic.key)
+					else
+						error_handler.add_custom_error (-1, "useless value", "value for unexpected parameter [" + ic.key + "]")
+					end
+				end
+				across
+					l_sql_params as ic
+				loop
+					error_handler.add_custom_error (-1, "invalid query", "missing value for sql parameter [" + ic.item + "]")
+				end
+			end
+		end
+
 	sql_query (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
 		deferred
 		end
@@ -42,6 +94,11 @@ feature -- Access
 
 	sql_rows_count: INTEGER
 			-- Number of rows for last sql execution.	
+		deferred
+		end
+
+	sql_start
+			-- Set the cursor on first element.
 		deferred
 		end
 

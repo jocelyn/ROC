@@ -47,6 +47,7 @@ feature -- Access: user
 			from
 				sql_query (select_users, Void)
 				sql_post_execution
+				sql_start
 			until
 				sql_after
 			loop
@@ -66,7 +67,7 @@ feature -- Access: user
 			error_handler.reset
 			log.write_information (generator + ".user")
 			create l_parameters.make (1)
-			l_parameters.put (a_id, "id")
+			l_parameters.put (a_id, "uid")
 			sql_query (select_user_by_id, l_parameters)
 			if sql_rows_count = 1 then
 				Result := fetch_user
@@ -136,20 +137,81 @@ feature -- Access: user
 
 feature -- Change: user
 
-	save_user (a_user: CMS_USER)
+	new_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+			l_password_salt, l_password_hash: STRING
+			l_security: SECURITY_PROVIDER
 		do
 			if
 				attached a_user.password as l_password and then
 				attached a_user.email as l_email
 			then
 				sql_begin_transaction
-				new_user (a_user)
+				error_handler.reset
+				create l_security
+				l_password_salt := l_security.salt
+				l_password_hash := l_security.password_hash (l_password, l_password_salt)
+
+				log.write_information (generator + ".new_user")
+				create l_parameters.make (4)
+				l_parameters.put (a_user.name, "name")
+				l_parameters.put (l_password_hash, "password")
+				l_parameters.put (l_password_salt, "salt")
+				l_parameters.put (l_email, "email")
+				l_parameters.put (create {DATE_TIME}.make_now_utc, "created")
+
+				sql_change (sql_insert_user, l_parameters)
+				sql_post_execution
+				if not error_handler.has_error then
+					a_user.set_id (last_inserted_user_id)
+					sql_post_execution
+				end
 				sql_commit_transaction
 			else
-				debug ("refactor_fixme")
-					fixme ("maybe we should not always carry password, in this case, to implement the else part..")
-				end
+				-- set error
+				error_handler.add_custom_error (-1, "bad request" , "Missing password or email")
+			end
+		end
+
+	update_user (a_user: CMS_USER)
+			-- Save user `a_user'.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+			l_password_salt, l_password_hash: detachable READABLE_STRING_8
+			l_security: SECURITY_PROVIDER
+		do
+			if attached a_user.password as l_password then
+					-- New password!
+				create l_security
+				l_password_salt := l_security.salt
+				l_password_hash := l_security.password_hash (l_password, l_password_salt)
+			else
+					-- Existing hashed password
+				l_password_hash := a_user.hashed_password
+				l_password_salt := user_salt (a_user.name)
+			end
+			if
+				l_password_hash /= Void and l_password_salt /= Void and
+				attached a_user.email as l_email
+			then
+				error_handler.reset
+
+				log.write_information (generator + ".update_user")
+				create l_parameters.make (6)
+				l_parameters.put (a_user.id, "uid")
+				l_parameters.put (a_user.name, "name")
+				l_parameters.put (l_password_hash, "password")
+				l_parameters.put (l_password_salt, "salt")
+				l_parameters.put (l_email, "email")
+				l_parameters.put (create {DATE_TIME}.make_now_utc, "changed")
+
+				sql_change (sql_update_user, l_parameters)
+				sql_post_execution
+			else
+					-- set error
+				error_handler.add_custom_error (-1, "bad request" , "Missing password or email")
 			end
 		end
 
@@ -189,44 +251,6 @@ feature {NONE} -- Implementation
 				if attached sql_read_string (1) as l_salt then
 					Result := l_salt
 				end
-			end
-			sql_post_execution
-		end
-
-	new_user (a_user: CMS_USER)
-			-- Add a new user `a_user'.
-		require
-			no_id: not a_user.has_id
-		local
-			l_parameters: STRING_TABLE [detachable ANY]
-			l_password_salt, l_password_hash: STRING
-			l_security: SECURITY_PROVIDER
-		do
-			if
-				attached a_user.password as l_password and then
-				attached a_user.email as l_email
-			then
-				error_handler.reset
-				create l_security
-				l_password_salt := l_security.salt
-				l_password_hash := l_security.password_hash (l_password, l_password_salt)
-
-				log.write_information (generator + ".new_user")
-				create l_parameters.make (4)
-				l_parameters.put (a_user.name, "username")
-				l_parameters.put (l_password_hash, "password")
-				l_parameters.put (l_password_salt, "salt")
-				l_parameters.put (l_email, "email")
-
-				sql_change (sql_insert_user, l_parameters)
-				sql_post_execution
-				if not error_handler.has_error then
-					a_user.set_id (last_inserted_user_id)
-					sql_post_execution
-				end
-			else
-				-- set error
-				error_handler.add_custom_error (-1, "bad request" , "Missing password or email")
 			end
 			sql_post_execution
 		end
@@ -282,25 +306,27 @@ feature {NONE} -- Sql Queries: USER
 	Select_users_count: STRING = "select count(*) from Users;"
 			-- Number of users.
 
-	Sql_last_insert_user_id: STRING = "SELECT MAX(id) from Users;"
+	Sql_last_insert_user_id: STRING = "SELECT MAX(uid) from Users;"
 
 	Select_users: STRING = "select * from Users;"
 			-- List of users.
 
-	Select_user_by_id: STRING = "select * from Users where id =:id;"
+	Select_user_by_id: STRING = "select * from Users where uid =:uid;"
 			-- Retrieve user by id if exists.
 
-	Select_user_by_name: STRING = "select * from Users where username =:name;"
+	Select_user_by_name: STRING = "select * from Users where name =:name;"
 			-- Retrieve user by name if exists.
 
 	Select_user_by_email: STRING = "select * from Users where email =:email;"
 			-- Retrieve user by email if exists.
 
-	Select_salt_by_username: STRING = "select salt from Users where username =:name;"
+	Select_salt_by_username: STRING = "select salt from Users where name =:name;"
 			-- Retrieve salt by username if exists.
 
-	SQL_Insert_user: STRING = "insert into users (username, password, salt, email) values (:username, :password, :salt, :email);"
-			-- SQL Insert to add a new node.	
+	Sql_Insert_user: STRING = "insert into users (name, password, salt, email, created) values (:name, :password, :salt, :email, :created);"
+			-- SQL Insert to add a new node.
+
+	sql_update_user: STRING = "update users SET name=:name, password=:password, salt=:salt, email=:email WHERE uid=:uid;"
 
 
 end
