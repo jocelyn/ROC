@@ -31,6 +31,7 @@ feature {NONE} -- Initialization
 			create {DATABASE_HANDLER_IMPL} db_handler.make (a_connection)
 
 			create error_handler.make
+--			error_handler.add_synchronization (db_handler.database_error_handler)
 		end
 
 	db_handler: DATABASE_HANDLER
@@ -43,7 +44,7 @@ feature -- Access: user
 	sql_post_execution
 			-- Post database execution.
 		do
---			error_handler.add_synchronization (db_handler.database_error_handler)
+			error_handler.append (db_handler.database_error_handler)
 			if error_handler.has_error then
 				log.write_critical (generator + ".post_execution " +  error_handler.as_string_representation)
 			end

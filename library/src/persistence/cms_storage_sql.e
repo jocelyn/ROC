@@ -95,7 +95,7 @@ feature -- Access
 			l_item: like sql_item
 		do
 			l_item := sql_item (a_index)
-			if attached {READABLE_STRING_32} l_item as l_string then
+			if attached {READABLE_STRING_8} l_item as l_string then
 				Result := l_string
 			elseif attached {BOOLEAN} l_item as l_boolean then
 				Result := l_boolean.out

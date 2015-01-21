@@ -195,6 +195,8 @@ feature {NONE} -- Implementation
 
 	new_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
+		require
+			no_id: not a_user.has_id
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 			l_password_salt, l_password_hash: STRING
@@ -217,6 +219,11 @@ feature {NONE} -- Implementation
 				l_parameters.put (l_email, "email")
 
 				sql_change (sql_insert_user, l_parameters)
+				sql_post_execution
+				if not error_handler.has_error then
+					a_user.set_id (last_inserted_user_id)
+					sql_post_execution
+				end
 			else
 				-- set error
 				error_handler.add_custom_error (-1, "bad request" , "Missing password or email")
@@ -258,10 +265,24 @@ feature {NONE} -- Implementation
 			end
 		end
 
+	last_inserted_user_id: INTEGER_64
+			-- Last insert user id.
+		do
+			error_handler.reset
+			log.write_information (generator + ".last_inserted_user_id")
+			sql_query (Sql_last_insert_user_id, Void)
+			if sql_rows_count = 1 then
+				Result := sql_read_integer_64 (1)
+			end
+			sql_post_execution
+		end
+
 feature {NONE} -- Sql Queries: USER
 
 	Select_users_count: STRING = "select count(*) from Users;"
 			-- Number of users.
+
+	Sql_last_insert_user_id: STRING = "SELECT MAX(id) from Users;"
 
 	Select_users: STRING = "select * from Users;"
 			-- List of users.
@@ -279,7 +300,7 @@ feature {NONE} -- Sql Queries: USER
 			-- Retrieve salt by username if exists.
 
 	SQL_Insert_user: STRING = "insert into users (username, password, salt, email) values (:username, :password, :salt, :email);"
-			-- SQL Insert to add a new node.		
+			-- SQL Insert to add a new node.	
 
 
 end

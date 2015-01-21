@@ -159,10 +159,22 @@ feature -- Handler
 		local
 			r: CMS_RESPONSE
 			s: STRING
+			l_user: CMS_USER
+			l_node: CMS_NODE
 		do
 			create {NOT_IMPLEMENTED_ERROR_CMS_RESPONSE} r.make (req, res, a_api)
 
-			a_api.new_node (create {CMS_NODE}.make ("This is a body", "summary this node", "Oh a node"))
+			if attached a_api.user_by_name ("foo") as u then
+				l_user := u
+			else
+				create l_user.make ("foo")
+				l_user.set_password ("foobar#")
+				l_user.set_email ("jfiat@eiffel.com")
+				a_api.new_user (l_user)
+			end
+			create l_node.make ({STRING_32} "This is a content", {STRING_32} "And a summary", {STRING_32} "Nice title")
+			l_node.set_author (l_user)
+			a_api.new_node (l_node)
 
 			create s.make_from_string ("<p>Sorry: listing the CMS nodes is not yet implemented.</p>")
 			if attached a_api.nodes as lst then

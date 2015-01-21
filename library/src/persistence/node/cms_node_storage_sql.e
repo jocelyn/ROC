@@ -111,14 +111,14 @@ feature -- Access
 			sql_post_execution
 		end
 
-	last_inserted_node_id: INTEGER
+	last_inserted_node_id: INTEGER_64
 			-- Last insert node id.
 		do
 			error_handler.reset
 			log.write_information (generator + ".last_inserted_node_id")
 			sql_query (Sql_last_insert_node_id, Void)
 			if sql_rows_count = 1 then
-				Result := sql_read_integer_32 (1)
+				Result := sql_read_integer_64 (1)
 			end
 			sql_post_execution
 		end
@@ -133,6 +133,7 @@ feature -- Change: Node
 			if a_node.has_id and attached a_node.author as l_author and then l_author.has_id then
 				update_node (l_author.id, a_node)
 			else
+					-- New node
 				error_handler.reset
 				log.write_information (generator + ".save_node")
 				create l_parameters.make (7)
@@ -151,8 +152,11 @@ feature -- Change: Node
 					l_parameters.put (0, "author_id")
 				end
 				sql_change (sql_insert_node, l_parameters)
-				a_node.set_id (last_inserted_node_id)
 				sql_post_execution
+				if not error_handler.has_error then
+					a_node.set_id (last_inserted_node_id)
+					sql_post_execution
+				end
 			end
 		end
 
@@ -298,7 +302,7 @@ feature {NONE} -- Implementation
 	fetch_node: CMS_NODE
 		do
 			create Result.make ("", "", "")
-			if attached sql_read_integer_32 (1) as l_id then
+			if attached sql_read_integer_64 (1) as l_id then
 				Result.set_id (l_id)
 			end
 			if attached sql_read_date_time (2) as l_publication_date then

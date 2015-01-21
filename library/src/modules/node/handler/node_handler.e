@@ -124,7 +124,7 @@ feature -- HTTP Methods
 				if attached {WSF_STRING} req.path_parameter ("id") as l_id then
 					if l_id.is_integer and then attached {CMS_NODE} api.node (l_id.integer_value) as l_node then
 						u_node := extract_data_form (req)
-						u_node.set_id (l_id.integer_value)
+						u_node.set_id (l_id.value.to_integer_64)
 						api.update_node (l_user.id,u_node)
 						(create {CMS_GENERIC_RESPONSE}).new_response_redirect (req, res, req.absolute_script_url (""))
 					else
