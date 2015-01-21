@@ -1,10 +1,17 @@
 {
 	"database": {
 		"datasource": {
-			"driver": "MySQL",
+			"driver": "sqlite",
+			"environment": "sqlite_development"
+		},
+		"olddatasource": {
+			"driver": "null",
 			"environment": "development"
 		},
 		"environments": {
+			"sqlite_development": {
+				"connection_string":"Server=localhost;Port=3306;Database=site/cms_lite.db;Uid=root;Pwd=;"
+				 },
 			"test": {
                 "connection_string":"Server=localhost;Port=3306;Database=cms_dev;Uid=root;Pwd=;"
 			},

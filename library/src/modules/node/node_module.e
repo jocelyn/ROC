@@ -33,7 +33,6 @@ feature {NONE} -- Initialization
 			config := a_setup
 		end
 
-
 	config: CMS_SETUP
 			-- Node configuration.
 
@@ -159,10 +158,28 @@ feature -- Handler
 	do_get_nodes (req: WSF_REQUEST; res: WSF_RESPONSE; a_api: CMS_API)
 		local
 			r: CMS_RESPONSE
+			s: STRING
 		do
 			create {NOT_IMPLEMENTED_ERROR_CMS_RESPONSE} r.make (req, res, a_api)
-			r.set_main_content ("Sorry: listing the CMS nodes is not yet implemented.")
-			r.add_block (create {CMS_CONTENT_BLOCK}.make ("nodes_warning", Void, "/nodes/ is not yet implemented", Void), "highlighted")
+
+			a_api.new_node (create {CMS_NODE}.make ("This is a body", "summary this node", "Oh a node"))
+
+			create s.make_from_string ("<p>Sorry: listing the CMS nodes is not yet implemented.</p>")
+			if attached a_api.nodes as lst then
+				across
+					lst as ic
+				loop
+					s.append ("<li>")
+					s.append (a_api.html_encoded (ic.item.title))
+					s.append (" (")
+					s.append (ic.item.id.out)
+					s.append (")")
+					s.append ("</li>%N")
+				end
+			end
+
+			r.set_main_content (s)
+			r.add_block (create {CMS_CONTENT_BLOCK}.make ("nodes_warning", Void, "/nodes/ is not yet implemented<br/>", Void), "highlighted")
 			r.execute
 		end
 

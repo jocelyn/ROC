@@ -33,7 +33,7 @@ feature -- Access: user
 		do
 		end
 
-	all_users: LIST [CMS_USER]
+	users: LIST [CMS_USER]
 		do
 			create {ARRAYED_LIST[CMS_USER]} Result.make (0)
 		end

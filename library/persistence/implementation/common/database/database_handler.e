@@ -153,22 +153,22 @@ feature -- Status Report
 		end
 
 	connection: DATABASE_CONNECTION
-		-- Database connection.
+			-- Database connection.
 
 	db_control: DB_CONTROL
-		-- Database control.
+			-- Database control.
 		do
 			Result := connection.db_control
 		end
 
 	db_result: detachable DB_RESULT
-		-- Database query result.
+			-- Database query result.
 
 	db_selection: detachable DB_SELECTION
-		-- Database selection.
+			-- Database selection.
 
 	db_change: detachable DB_CHANGE
-		-- Database modification.	
+			-- Database modification.	
 
 feature -- Error handling
 

@@ -7,8 +7,19 @@ class
 	CMS_API
 
 inherit
+	ANY
 
 	REFACTORING_HELPER
+
+	SHARED_HTML_ENCODER
+		export
+			{NONE} all
+		end
+
+	SHARED_WSF_PERCENT_ENCODER
+		export
+			{NONE} all
+		end
 
 create
 	make
@@ -83,10 +94,10 @@ feature -- Access: Node
 			debug ("refactor_fixme")
 				fixme ("Implementation")
 			end
-			Result := storage.recent_nodes (0, 10)
+			Result := storage.nodes
 		end
 
-	recent_nodes (a_offset, a_rows: INTEGER): LIST[CMS_NODE]
+	recent_nodes (a_offset, a_rows: INTEGER): LIST [CMS_NODE]
 			-- List of the `a_rows' most recent nodes starting from  `a_offset'.
 		do
 			Result := storage.recent_nodes (a_offset, a_rows)
@@ -172,6 +183,20 @@ feature -- Change User
 					fixme ("Add error")
 				end
 			end
+		end
+
+feature -- Helpers
+
+	html_encoded (a_string: READABLE_STRING_GENERAL): STRING_8
+			-- `a_string' encoded for html output.
+		do
+			Result := html_encoder.general_encoded_string (a_string)
+		end
+
+	percent_encoded (a_string: READABLE_STRING_GENERAL): STRING_8
+			-- `a_string' encoded with percent encoding, mainly used for url.
+		do
+			Result := percent_encoder.percent_encoded_string (a_string)
 		end
 
 feature -- Layout

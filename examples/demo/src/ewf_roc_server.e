@@ -148,6 +148,7 @@ feature -- CMS setup
 				to_implement ("To implement custom storage")
 			end
 			a_setup.storage_drivers.force (create {CMS_STORAGE_MYSQL_BUILDER}.make, "mysql")
+			a_setup.storage_drivers.force (create {CMS_STORAGE_SQLITE_BUILDER}.make, "sqlite")
 		end
 
 end

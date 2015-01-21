@@ -216,6 +216,7 @@ feature -- Test routines
 			across 1 |..| 10 as c loop
 				storage.save_node (custom_node ("Content_" + c.item.out, "Summary_" + c.item.out, "Title_" + c.item.out))
 			end
+			assert ("has nodes", storage.nodes.count > 5)
 			assert ("Node id: 10", attached storage.node (10) as l_node and then l_node.title ~ "Title_10" )
 		end
 
