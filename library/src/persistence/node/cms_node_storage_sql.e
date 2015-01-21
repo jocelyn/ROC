@@ -125,38 +125,34 @@ feature -- Access
 
 feature -- Change: Node
 
-	save_node (a_node: CMS_NODE)
+	new_node (a_node: CMS_NODE)
 			-- Save node `a_node'.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
-			if a_node.has_id and attached a_node.author as l_author and then l_author.has_id then
-				update_node (l_author.id, a_node)
+				-- New node
+			error_handler.reset
+			log.write_information (generator + ".new_node")
+			create l_parameters.make (7)
+			l_parameters.put (a_node.title, "title")
+			l_parameters.put (a_node.summary, "summary")
+			l_parameters.put (a_node.content, "content")
+			l_parameters.put (a_node.publication_date, "publication_date")
+			l_parameters.put (a_node.creation_date, "creation_date")
+			l_parameters.put (a_node.modification_date, "modification_date")
+			if
+				attached a_node.author as l_author and then
+			 	l_author.id > 0
+			then
+				l_parameters.put (l_author.id, "author_id")
 			else
-					-- New node
-				error_handler.reset
-				log.write_information (generator + ".save_node")
-				create l_parameters.make (7)
-				l_parameters.put (a_node.title, "title")
-				l_parameters.put (a_node.summary, "summary")
-				l_parameters.put (a_node.content, "content")
-				l_parameters.put (a_node.publication_date, "publication_date")
-				l_parameters.put (a_node.creation_date, "creation_date")
-				l_parameters.put (a_node.modification_date, "modification_date")
-				if
-					attached a_node.author as l_author and then
-				 	l_author.id > 0
-				then
-					l_parameters.put (l_author.id, "author_id")
-				else
-					l_parameters.put (0, "author_id")
-				end
-				sql_change (sql_insert_node, l_parameters)
+				l_parameters.put (0, "author_id")
+			end
+			sql_change (sql_insert_node, l_parameters)
+			sql_post_execution
+			if not error_handler.has_error then
+				a_node.set_id (last_inserted_node_id)
 				sql_post_execution
-				if not error_handler.has_error then
-					a_node.set_id (last_inserted_node_id)
-					sql_post_execution
-				end
 			end
 		end
 
@@ -178,9 +174,8 @@ feature -- Change: Node
 			sql_post_execution
 		end
 
-	update_node (a_user_id: like {CMS_USER}.id; a_node: CMS_NODE)
+	update_node (a_node: CMS_NODE)
 			-- Update node content `a_node'.
-			-- The user `a_user_id' is an existing or new collaborator.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
@@ -193,55 +188,64 @@ feature -- Change: Node
 			l_parameters.put (a_node.publication_date, "publication_date")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
 			l_parameters.put (a_node.id, "id")
-			l_parameters.put (a_user_id, "editor")
+			if attached a_node.author as l_author then
+				l_parameters.put (l_author.id, "id")
+				l_parameters.put (l_author.id, "editor")
+			else
+				l_parameters.put (0, "id")
+				l_parameters.put (0, "editor")
+			end
 			sql_change (sql_update_node, l_parameters)
 			sql_post_execution
 		end
 
-	update_node_title (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
+	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
 			-- Update node title to `a_title', node identified by id `a_node_id'.
-			-- The user `a_id' is an existing or new collaborator.
+			-- The user `a_user_id' is an existing or new collaborator.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
+			-- FIXME: unused a_user_id !
 			error_handler.reset
 			log.write_information (generator + ".update_node_title")
 			create l_parameters.make (3)
 			l_parameters.put (a_title, "title")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
-			l_parameters.put (a_id, "id")
+			l_parameters.put (a_node_id, "id")
 			sql_change (sql_update_node_title, l_parameters)
 			sql_post_execution
 		end
 
-	update_node_summary (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
+	update_node_summary (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
 			-- Update node summary to `a_summary', node identified by id `a_node_id'.
-			-- The user `a_id' is an existing or new collaborator.
+			-- The user `a_user_id' is an existing or new collaborator.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
+			-- FIXME: unused a_user_id !
 			error_handler.reset
 			log.write_information (generator + ".update_node_summary")
 			create l_parameters.make (3)
 			l_parameters.put (a_summary, "summary")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
-			l_parameters.put (a_id, "id")
+			l_parameters.put (a_node_id, "id")
 			sql_change (sql_update_node_summary, l_parameters)
 			sql_post_execution
 		end
 
-	update_node_content (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
+	update_node_content (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
 			-- Update node content to `a_content', node identified by id `a_node_id'.
-			-- The user `a_id' is an existing or new collaborator.
+			-- The user `a_user_id' is an existing or new collaborator.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
 		do
+			-- FIXME: unused a_user_id !
 			error_handler.reset
 			log.write_information (generator + ".update_node_content")
 			create l_parameters.make (3)
 			l_parameters.put (a_content, "content")
 			l_parameters.put (create {DATE_TIME}.make_now_utc, "modification_date")
-			l_parameters.put (a_id, "id")
+			l_parameters.put (a_node_id, "id")
 			sql_change (sql_update_node_content, l_parameters)
 			sql_post_execution
 		end

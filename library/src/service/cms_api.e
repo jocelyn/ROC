@@ -116,8 +116,10 @@ feature -- Change: Node
 
 	new_node (a_node: CMS_NODE)
 			-- Add a new node `a_node'
+		require
+			no_id: not a_node.has_id
 		do
-			storage.save_node (a_node)
+			storage.new_node (a_node)
 		end
 
 	delete_node (a_id: INTEGER_64)
@@ -126,37 +128,37 @@ feature -- Change: Node
 			storage.delete_node (a_id)
 		end
 
-	update_node (a_id: like {CMS_USER}.id; a_node: CMS_NODE)
-			-- Update node by id `a_id' with `a_node' data.
+	update_node (a_node: CMS_NODE)
+			-- Update node `a_node' data.
 		do
-			storage.update_node (a_id,a_node)
+			storage.update_node (a_node)
 		end
 
-	update_node_title (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
+	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
 			-- Update node title, with user identified by `a_id', with node id `a_node_id' and a new title `a_title'.
 		do
 			debug ("refactor_fixme")
 				fixme ("Check preconditions")
 			end
-			storage.update_node_title (a_id,a_node_id,a_title)
+			storage.update_node_title (a_user_id, a_node_id, a_title)
 		end
 
-	update_node_summary (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
-			-- Update node summary, with user identified by `a_id', with node id `a_node_id' and a new summary `a_summary'.
+	update_node_summary (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
+			-- Update node summary, with user identified by `a_user_id', with node id `a_node_id' and a new summary `a_summary'.
 		do
 			debug ("refactor_fixme")
 				fixme ("Check preconditions")
 			end
-			storage.update_node_summary (a_id,a_node_id, a_summary)
+			storage.update_node_summary (a_user_id, a_node_id, a_summary)
 		end
 
-	update_node_content (a_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
-			-- Update node content, with user identified by `a_id', with node id `a_node_id' and a new content `a_content'.
+	update_node_content (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
+			-- Update node content, with user identified by `a_user_id', with node id `a_node_id' and a new content `a_content'.
 		do
 			debug ("refactor_fixme")
 				fixme ("Check preconditions")
 			end
-			storage.update_node_content (a_id,a_node_id, a_content)
+			storage.update_node_content (a_user_id, a_node_id, a_content)
 		end
 
 

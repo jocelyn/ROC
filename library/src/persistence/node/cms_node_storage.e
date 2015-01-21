@@ -45,9 +45,10 @@ feature -- Access
 
 feature -- Change: Node
 
-	save_node (a_node: CMS_NODE)
+	new_node (a_node: CMS_NODE)
 			-- Save node `a_node'.
 		require
+			no_id: not a_node.has_id
 			valid_user: attached a_node.author as l_author implies l_author.id > 0
 		deferred
 		end
@@ -59,12 +60,12 @@ feature -- Change: Node
 		deferred
 		end
 
-	update_node (a_id: like {CMS_USER}.id; a_node: CMS_NODE)
+	update_node (a_node: CMS_NODE)
 			-- Update node content `a_node'.
 			-- The user `a_id' is an existing or new collaborator.
 		require
-			valid_node_id: a_node.id > 0
-			valid_user_id: a_id > 0
+			has_id: a_node.has_id
+			has_author: attached a_node.author as l_author and then l_author.has_id
 		deferred
 		end
 

@@ -62,13 +62,13 @@ feature -- Access: user
 
 	sql_query (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
 		do
-			db_handler.set_query (create {DATABASE_QUERY}.data_reader (a_sql_statement, Void))
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (a_sql_statement, a_params))
 			db_handler.execute_query
 		end
 
 	sql_change (a_sql_statement: STRING; a_params: detachable STRING_TABLE [detachable ANY])
 		do
-			db_handler.set_query (create {DATABASE_QUERY}.data_reader (a_sql_statement, Void))
+			db_handler.set_query (create {DATABASE_QUERY}.data_reader (a_sql_statement, a_params))
 			db_handler.execute_change
 		end
 

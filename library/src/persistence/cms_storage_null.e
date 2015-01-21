@@ -126,7 +126,7 @@ feature -- Access: node
 
 feature -- Node
 
-	save_node (a_node: CMS_NODE)
+	new_node (a_node: CMS_NODE)
 			-- Add a new node
 		do
 		end
@@ -136,22 +136,22 @@ feature -- Node
 		do
 		end
 
-	update_node (a_id: like {CMS_NODE}.id; a_node: CMS_NODE)
+	update_node (a_node: CMS_NODE)
 			-- <Precursor>
 		do
 		end
 
-	update_node_title (a_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
+	update_node_title (a_user_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
 			-- <Precursor>
 		do
 		end
 
-	update_node_summary (a_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
+	update_node_summary (a_user_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_summary: READABLE_STRING_32)
 			-- <Precursor>
 		do
 		end
 
-	update_node_content (a_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
+	update_node_content (a_user_id: like {CMS_NODE}.id; a_node_id: like {CMS_NODE}.id; a_content: READABLE_STRING_32)
 			-- <Precursor>
 		do
 		end
