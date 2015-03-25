@@ -9,8 +9,8 @@
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="cms" location="..\..\..\cms.ecf"/>
 		<library name="crypto" location="$ISE_LIBRARY\unstable\library\text\encryption\crypto\crypto.ecf"/>
-		<library name="encoder" location="$ISE_LIBRARY\contrib\library\web\framework\ewf\text\encoder\encoder.ecf"/>
-		<library name="error" location="$ISE_LIBRARY\contrib\library\utility\general\error\error.ecf"/>
+		<library name="encoder" location="$EWF_LIBRARY\library\text\encoder\encoder.ecf"/>
+		<library name="error" location="$EWF_LIBRARY\library\utility\general\error\error.ecf"/>
 		<library name="json" location="$ISE_LIBRARY\contrib\library\text\parser\json\library\json.ecf" readonly="false"/>
 		<library name="layout" location="..\..\layout\layout.ecf"/>
 		<library name="logging" location="$ISE_LIBRARY\library\runtime\logging\logging.ecf"/>

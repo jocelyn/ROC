@@ -87,6 +87,7 @@ feature -- Change: user
 	new_user (a_user: CMS_USER)
 			-- Add a new user `a_user'.
 		do
+			a_user.set_id (1)
 		end
 
 	update_user (a_user: CMS_USER)
