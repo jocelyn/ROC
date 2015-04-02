@@ -6,53 +6,49 @@ note
 				even for a specific handler.
 			]"
 
-class
-	CMS_SERVICE
+deferred class
+	CMS_EXECUTION
 
 inherit
-	WSF_ROUTED_SKELETON_SERVICE
-		rename
-			execute as execute_service
+	WSF_FILTERED_ROUTED_SKELETON_EXECUTION
 		undefine
 			requires_proxy
 		redefine
-			execute_default
-		end
-
-	WSF_FILTERED_SERVICE
-
-	WSF_FILTER
-		rename
-			execute as execute_filter
+			execute_default,
+			filter_execute,
+			initialize
 		end
 
 	WSF_NO_PROXY_POLICY
 
-	WSF_URI_HELPER_FOR_ROUTED_SERVICE
+	WSF_URI_HELPER_FOR_ROUTED_EXECUTION
 
-	WSF_URI_TEMPLATE_HELPER_FOR_ROUTED_SERVICE
+	WSF_URI_TEMPLATE_HELPER_FOR_ROUTED_EXECUTION
 
 	REFACTORING_HELPER
 
 	SHARED_LOGGER
 
-create
-	make
+--create
+--	make
 
 feature {NONE} -- Initialization
 
-	make (a_api: CMS_API)
+	initialize
 			-- Build a CMS service with `a_api'
 		do
-			api := a_api
-			initialize
-		ensure
-			api_set: api = a_api
+			initialize_cms (cms_setup)
+			Precursor
 		end
 
-	initialize
-			-- Initialize various parts of the CMS service.
+	initialize_cms (a_setup: CMS_SETUP)
 		do
+			setup := a_setup
+			write_debug_log (generator + ".initialize_cms")
+			setup_modules (a_setup)
+			create api.make (a_setup)
+
+				-- CMS Initialization
 			initialize_modules
 			initialize_users
 			initialize_auth_engine
@@ -86,6 +82,17 @@ feature {NONE} -- Initialization
 	initialize_auth_engine
 		do
 			to_implement ("To Implement authentication engine")
+		end
+
+feature -- CMS setup
+
+	setup_modules (a_setup: CMS_SETUP)
+			-- Setup additional modules.
+		deferred
+		end
+
+	setup_storage (a_setup: CMS_SETUP)
+		deferred
 		end
 
 feature -- Settings: router
@@ -155,12 +162,12 @@ feature -- Settings: router
 
 feature -- Execute Filter
 
-	execute_filter (req: WSF_REQUEST; res: WSF_RESPONSE)
+	filter_execute (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- Execute the filter.
 		do
 			res.put_header_line ("Date: " + (create {HTTP_DATE}.make_now_utc).string)
 			res.put_header_line ("X-EWF-Server: CMS_v1.0")
-			execute_service (req, res)
+			Precursor (req, res)
 		end
 
 feature -- Filters
@@ -225,13 +232,27 @@ feature -- Filters
 
 feature -- Access	
 
+	layout: CMS_LAYOUT
+
 	api: CMS_API
 			-- API service.
 
-	setup:  CMS_SETUP
+	setup: CMS_SETUP
+
+	cms_setup: CMS_DEFAULT_SETUP
 			-- CMS setup.
+		local
+			utf: UTF_CONVERTER
 		do
-			Result := api.setup
+			if attached execution_environment.arguments.separate_character_option_value ('d') as l_dir then
+				create layout.make_with_directory_name (l_dir)
+			else
+				create layout.make_default
+			end
+			initialize_logger (layout)
+			write_debug_log (generator + ".cms_setup based directory %"" + utf.escaped_utf_32_string_to_utf_8_string_8 (layout.path.name) + "%"")
+			create Result.make (layout)
+			setup_storage (Result)
 		end
 
 	modules: CMS_MODULE_COLLECTION

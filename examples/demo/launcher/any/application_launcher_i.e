@@ -23,9 +23,9 @@ feature -- Execution
 		do
 			nature := launcher_nature
 			if nature = Void then
-				launch_httpd (opts)
-			elseif nature = nature_httpd then
-				launch_httpd (opts)
+				launch_standalone (opts)
+			elseif nature = nature_standalone then
+				launch_standalone (opts)
 			elseif nature = nature_nino then
 				launch_nino (opts)
 			elseif nature = nature_cgi then
@@ -54,8 +54,8 @@ feature {NONE} -- Access
 				ext := l_entry.extension
 			end
 			if ext /= Void then
-				if ext.same_string (nature_httpd) then
-					Result := nature_httpd
+				if ext.same_string (nature_standalone) then
+					Result := nature_standalone
 				end
 				if ext.same_string (nature_nino) then
 					Result := nature_nino
@@ -70,13 +70,13 @@ feature {NONE} -- Access
 			Result := default_nature
 		end
 
-feature {NONE} -- httpd		
+feature {NONE} -- standalone		
 
-	nature_httpd: STRING = "httpd"
+	nature_standalone: STRING = "standalone"
 
-	launch_httpd (opts: detachable WSF_SERVICE_LAUNCHER_OPTIONS)
+	launch_standalone (opts: detachable WSF_SERVICE_LAUNCHER_OPTIONS)
 		local
-			launcher: WSF_HTTPD_SERVICE_LAUNCHER [G]
+			launcher: WSF_STANDALONE_SERVICE_LAUNCHER [G]
 		do
 			create launcher.make_and_launch (opts)
 		end
@@ -118,7 +118,7 @@ feature -- Default
 
 	default_nature: STRING
 		do
-			Result := nature_httpd
+			Result := nature_standalone
 		end
 
 

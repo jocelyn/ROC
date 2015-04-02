@@ -8,7 +8,7 @@ class
 	EWF_ROC_SERVER_EXECUTION
 
 inherit
-	WSF_EXECUTION
+	CMS_EXECUTION
 		redefine
 			initialize
 		end
@@ -25,52 +25,6 @@ feature {NONE} -- Initialization
 	initialize
 		do
 			Precursor
-			initialize_cms (cms_setup)
-		end
-
-feature -- Access
-
-	cms_service: CMS_SERVICE
-			-- cms service.
-
-	layout: CMS_LAYOUT
-			-- cms layout.
-
-feature -- Execution		
-
-	execute
-		local
-		do
-			cms_service.execute (request, response)
-		end
-
-feature -- CMS Initialization
-
-	cms_setup: CMS_DEFAULT_SETUP
-		local
-			utf: UTF_CONVERTER
-		do
-			if attached execution_environment.arguments.separate_character_option_value ('d') as l_dir then
-				create layout.make_with_directory_name (l_dir)
-			else
-				create layout.make_default
-			end
-			initialize_logger (layout)
-			write_debug_log (generator + ".cms_setup based directory %"" + utf.escaped_utf_32_string_to_utf_8_string_8 (layout.path.name) + "%"")
-			create Result.make (layout)
-			setup_storage (Result)
-		end
-
-	initialize_cms (a_setup: CMS_SETUP)
-		local
-			cms: CMS_SERVICE
-			api: CMS_API
-		do
-			write_debug_log (generator + ".initialize_cms")
-			setup_modules (a_setup)
-			create api.make (a_setup)
-			create cms.make (api)
-			cms_service := cms
 		end
 
 feature -- CMS setup
