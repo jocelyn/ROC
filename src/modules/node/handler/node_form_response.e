@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {NODE_FORM_RESPONSE}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -49,6 +48,7 @@ feature -- Execution
 				nid > 0 and then
 				attached node_api.node (nid) as l_node
 			then
+				fixme ("Remove Hardcoded HTML")
 				if attached node_api.content_type (l_node.content_type) as l_type then
 					if has_permission ("edit " + l_type.name) then
 						f := edit_form (l_node, url (request.path_info, Void), "edit-" + l_type.name, l_type)
@@ -233,6 +233,7 @@ feature -- Form
 
 	new_node (a_content_type: CMS_CONTENT_TYPE; a_form_data: WSF_FORM_DATA; a_node: detachable CMS_NODE): CMS_NODE
 		do
+			--| TODO: Why we need a_node as parameter? if we build the node from the form_data?
 			if attached node_api.content_type_webform_manager (a_content_type.name) as wf then
 				Result := wf.new_node (Current, a_form_data, a_node)
 			else
@@ -241,7 +242,9 @@ feature -- Form
 		end
 
 	change_node (a_content_type: CMS_CONTENT_TYPE; a_form_data: WSF_FORM_DATA; a_node: CMS_NODE)
+			-- Update node `a_node' with form_data `a_form_data' for the given content type `a_content_type'.
 		do
+			--| What's the difference of change_node and fill_edit_form?
 			if attached node_api.content_type_webform_manager (a_content_type.name) as wf then
 				wf.change_node (Current, a_form_data, a_node)
 			end
