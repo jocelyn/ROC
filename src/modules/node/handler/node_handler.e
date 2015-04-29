@@ -69,6 +69,7 @@ feature -- HTTP Methods
 			l_nid: INTEGER_64
 			edit_response: NODE_FORM_RESPONSE
 		do
+			fixme ("Removed Hardcoded html")
 			if req.path_info.ends_with_general ("/edit") then
 				create edit_response.make (req, res, api, node_api)
 				edit_response.execute
@@ -314,7 +315,7 @@ feature {NONE} -- Node
 --				l_page.execute
 			else
 				create l_gen_page.make (req, res, api)
-
+				fixme ("Remove hardcoded HTML.")
 				create s.make_empty
 				s.append ("<ul>")
 				across

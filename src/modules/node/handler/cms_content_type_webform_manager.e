@@ -1,6 +1,5 @@
 note
 	description: "Summary description for {CMS_CONTENT_TYPE_WEBFORM_MANAGER}."
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -31,6 +30,7 @@ feature -- Forms ...
 		end
 
 	new_node (response: NODE_RESPONSE; a_form_data: WSF_FORM_DATA; a_node: detachable CMS_NODE): CMS_NODE
+			-- New node 
 		deferred
 --			Result := content_type.new_node (a_node)
 		end
