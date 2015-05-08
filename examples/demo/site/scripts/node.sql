@@ -11,7 +11,8 @@ CREATE TABLE "nodes"(
   "author" INTEGER,
   "publish" DATETIME,
   "created" DATETIME NOT NULL,
-  "changed" DATETIME NOT NULL
+  "changed" DATETIME NOT NULL,
+  "deleted_at" DATETIME NULL
 );
 
 CREATE TABLE page_nodes(

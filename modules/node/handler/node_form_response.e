@@ -228,6 +228,12 @@ feature -- Form
 			ts.set_default_value ("Preview")
 			f.extend (ts)
 
+			if a_node /= Void and then a_node.id > 0 and then has_permission ("delete " + a_name) then
+				create ts.make ("op")
+				ts.set_default_value ("Delete")
+				f.extend (ts)
+			end
+
 			Result := f
 		end
 

@@ -144,12 +144,15 @@ feature -- Change: Node
 			-- Remove node by id `a_id'.
 		local
 			l_parameters: STRING_TABLE [ANY]
+			l_time: DATE_TIME
 		do
+			create l_time.make_now_utc
 			write_information_log (generator + ".delete_node")
 
 			error_handler.reset
 			create l_parameters.make (1)
 			l_parameters.put (a_id, "nid")
+			l_parameters.put (l_time, "deleted_at")
 			sql_change (sql_delete_node, l_parameters)
 		end
 
@@ -260,9 +263,9 @@ feature -- Helpers
 
 feature {NONE} -- Queries
 
-	sql_select_nodes_count: STRING = "SELECT count(*) from Nodes;"
+	sql_select_nodes_count: STRING = "SELECT count(*) from Nodes where deleted_at IS NULL;"
 
-	sql_select_nodes: STRING = "SELECT * from Nodes;"
+	sql_select_nodes: STRING = "SELECT * from Nodes where deleted_at IS NULL;"
 			-- SQL Query to retrieve all nodes.
 
 	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed FROM Nodes WHERE nid =:nid ORDER BY revision desc, publish desc LIMIT 1;"
@@ -277,7 +280,8 @@ feature {NONE} -- Queries
 --	sql_update_node : STRING = "UPDATE nodes SET revision = revision + 1, type=:type, title=:title, summary=:summary, content=:content, format=:format, publish=:publish, changed=:changed, revision = revision + 1, author=:author WHERE nid=:nid;"
 			-- SQL node.
 
-	sql_delete_node: STRING = "DELETE FROM nodes WHERE nid=:nid;"
+	sql_delete_node: STRING = "UPDATE nodes SET deleted_at = :deleted_at WHERE nid=:nid"
+			-- Soft deletion with free metadata.
 
 --	sql_update_node_author: STRING  = "UPDATE nodes SET author=:author WHERE nid=:nid;"
 

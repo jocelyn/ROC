@@ -48,16 +48,11 @@ feature -- Factory
 		local
 			u: CMS_USER
 			r: CMS_USER_ROLE
+			l: LIST[CMS_USER_ROLE]
 		do
 				-- Schema
 			a_storage.sql_execute_file_script (a_setup.environment.path.extended ("scripts").extended ("core.sql"))
 
-				-- Data	
-				-- Users
-			create u.make ("admin")
-			u.set_password ("istrator#")
-			u.set_email (a_setup.site_email)
-			a_storage.new_user (u)
 
 				-- Roles
 			create r.make ("anonymous")
@@ -65,10 +60,40 @@ feature -- Factory
 			create r.make ("authenticated")
 			r.add_permission ("create page")
 			r.add_permission ("edit page")
+			r.add_permission ("delete page")
 			a_storage.save_user_role (r)
 
-				-- Test custom value
 
+			create {ARRAYED_LIST[CMS_USER_ROLE]} l.make (1)
+			l.force (r)
+
+				-- Users
+			create u.make ("admin")
+			u.set_password ("istrator#")
+			u.set_email (a_setup.site_email)
+			a_storage.new_user (u)
+
+			create u.make ("auth")
+			u.set_password ("enticated#")
+			u.set_email (a_setup.site_email)
+			u.set_roles (l)
+			a_storage.new_user (u)
+
+				-- Roles, view role for testing.
+			create r.make ("view")
+			r.add_permission ("view page")
+			a_storage.save_user_role (r)
+
+			create {ARRAYED_LIST[CMS_USER_ROLE]} l.make (1)
+			l.force (r)
+
+			create u.make ("view")
+			u.set_password ("only#")
+			u.set_email (a_setup.site_email)
+			u.set_roles (l)
+			a_storage.new_user (u)
+
+				-- Test custom value
 			a_storage.set_custom_value ("abc", "123", "test")
 			a_storage.set_custom_value ("abc", "OK", "test")
 		end
