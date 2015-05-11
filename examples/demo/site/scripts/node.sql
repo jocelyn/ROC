@@ -12,7 +12,7 @@ CREATE TABLE "nodes"(
   "publish" DATETIME,
   "created" DATETIME NOT NULL,
   "changed" DATETIME NOT NULL,
-  "deleted_at" DATETIME NULL
+  "status"  INTEGER
 );
 
 CREATE TABLE page_nodes(

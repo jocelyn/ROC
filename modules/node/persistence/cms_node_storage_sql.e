@@ -151,8 +151,9 @@ feature -- Change: Node
 
 			error_handler.reset
 			create l_parameters.make (1)
+			l_parameters.put (l_time, "changed")
+			l_parameters.put ({CMS_NODE_CONSTANTS}.trash, "status")
 			l_parameters.put (a_id, "nid")
-			l_parameters.put (l_time, "deleted_at")
 			sql_change (sql_delete_node, l_parameters)
 		end
 
@@ -212,7 +213,7 @@ feature {NONE} -- Implementation
 			error_handler.reset
 
 			write_information_log (generator + ".store_node")
-			create l_parameters.make (8)
+			create l_parameters.make (9)
 			l_parameters.put (a_node.content_type, "type")
 			l_parameters.put (a_node.title, "title")
 			l_parameters.put (a_node.summary, "summary")
@@ -220,6 +221,7 @@ feature {NONE} -- Implementation
 			l_parameters.put (a_node.format, "format")
 			l_parameters.put (a_node.publication_date, "publish")
 			l_parameters.put (now, "changed")
+			l_parameters.put (a_node.status, "status")
 			if attached a_node.author as l_author then
 				check valid_author: l_author.has_id end
 				l_parameters.put (l_author.id, "author")
@@ -263,24 +265,26 @@ feature -- Helpers
 
 feature {NONE} -- Queries
 
-	sql_select_nodes_count: STRING = "SELECT count(*) from Nodes where deleted_at IS NULL;"
+	sql_select_nodes_count: STRING = "SELECT count(*) FROM Nodes WHERE status != 3;"
+			-- Nodes count (Published and not Published)
+			-- TODO: add queries to retrieve published_nodes_count, no_published_nodes_count. etc
 
-	sql_select_nodes: STRING = "SELECT * from Nodes where deleted_at IS NULL;"
+	sql_select_nodes: STRING = "SELECT * FROM Nodes WHERE status != 3;"
 			-- SQL Query to retrieve all nodes.
 
-	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed FROM Nodes WHERE nid =:nid ORDER BY revision desc, publish desc LIMIT 1;"
+	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes WHERE nid =:nid ORDER BY revision desc, publish desc LIMIT 1;"
 
-	sql_select_recent_nodes: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed FROM Nodes ORDER BY nid desc, publish desc LIMIT :rows OFFSET :offset ;"
+	sql_select_recent_nodes: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes ORDER BY nid desc, publish desc LIMIT :rows OFFSET :offset ;"
 
-	sql_insert_node: STRING = "INSERT INTO nodes (revision, type, title, summary, content, format, publish, created, changed, author) VALUES (1, :type, :title, :summary, :content, :format, :publish, :created, :changed, :author);"
+	sql_insert_node: STRING = "INSERT INTO nodes (revision, type, title, summary, content, format, publish, created, changed, status, author) VALUES (1, :type, :title, :summary, :content, :format, :publish, :created, :changed, :status, :author);"
 			-- SQL Insert to add a new node.
 
-	sql_update_node : STRING = "UPDATE nodes SET revision = revision, type=:type, title=:title, summary=:summary, content=:content, format=:format, publish=:publish, changed=:changed, author=:author WHERE nid=:nid;"
+	sql_update_node : STRING = "UPDATE nodes SET revision = revision, type=:type, title=:title, summary=:summary, content=:content, format=:format, publish=:publish, changed=:changed, status=:status, author=:author WHERE nid=:nid;"
 -- FIXME: for now no revision inc.!
 --	sql_update_node : STRING = "UPDATE nodes SET revision = revision + 1, type=:type, title=:title, summary=:summary, content=:content, format=:format, publish=:publish, changed=:changed, revision = revision + 1, author=:author WHERE nid=:nid;"
 			-- SQL node.
 
-	sql_delete_node: STRING = "UPDATE nodes SET deleted_at = :deleted_at WHERE nid=:nid"
+	sql_delete_node: STRING = "UPDATE nodes SET changed=:changed, status =:status WHERE nid=:nid"
 			-- Soft deletion with free metadata.
 
 --	sql_update_node_author: STRING  = "UPDATE nodes SET author=:author WHERE nid=:nid;"
@@ -338,6 +342,16 @@ feature {NONE} -- Implementation
 				end
 				if attached sql_read_date_time (11) as l_modif_date then
 					Result.set_modification_date (l_modif_date)
+				end
+				if attached sql_read_integer_32 (12) as l_status then
+					inspect l_status
+					when {CMS_NODE_CONSTANTS}.not_published then
+						Result.mark_not_published
+					when {CMS_NODE_CONSTANTS}.published then
+						Result.mark_published
+					when {CMS_NODE_CONSTANTS}.trash then
+						Result.mark_trash
+					end
 				end
 			end
 		end
