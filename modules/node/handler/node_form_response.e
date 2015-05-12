@@ -48,7 +48,7 @@ feature -- Execution
 				attached node_api.node (nid) as l_node
 			then
 				if attached node_api.node_type_for (l_node) as l_type then
-					if has_permission ("edit " + node_api.permission_scope (current_user_name (request), nid) + " " +  l_type.name) then
+					if has_permission ("edit " + node_api.permission_scope (current_user (request), l_node) + " " +  l_type.name) then
 						f := edit_form (l_node, url (request.path_info, Void), "edit-" + l_type.name, l_type)
 						if request.is_post_request_method then
 							f.validation_actions.extend (agent edit_form_validate (?, b))

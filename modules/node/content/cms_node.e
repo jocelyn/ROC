@@ -13,10 +13,6 @@ inherit
 
 	REFACTORING_HELPER
 
---create
---	make,
---	make_empty
-
 feature{NONE} -- Initialization
 
 	make_empty
@@ -36,10 +32,6 @@ feature{NONE} -- Initialization
 			set_modification_date (l_time)
 			set_publication_date (l_time)
 			mark_not_published
-
-			debug ("refactor_fixme")
-				fixme ("Remove default harcoded format")
-			end
 		ensure
 			title_set: title = a_title
 		end
@@ -82,7 +74,9 @@ feature -- Access
 
 	status: INTEGER
 			-- Associated status for the current node.
-			-- [{0,Not_Published}, {1, Published}, {2, Trash}]	
+			-- default:	{CMS_NODE_API}.Not_Published}
+			--			{CMS_NODE_API}.Published
+			--			{CMS_NODE_API}.Trashed
 
 feature -- Access		
 
@@ -233,7 +227,7 @@ feature -- Element change
 			status_published: status = {CMS_NODE_API}.published
 		end
 
-	mark_trash
+	mark_trashed
 			-- Set status to published
 		do
 			set_status ({CMS_NODE_API}.trashed)
@@ -242,7 +236,7 @@ feature -- Element change
 		end
 
 
-feature {CMS_NODE_STORAGE_I} -- Selective Export
+feature {CMS_NODE_STORAGE_I} -- Access: status change.
 
 	set_status (a_status: like status)
 			-- Assign `status' with `a_status'.

@@ -47,61 +47,62 @@ feature -- Factory
 	initialize (a_setup: CMS_SETUP; a_storage: CMS_STORAGE_STORE_SQL)
 		local
 			u: CMS_USER
-			r: CMS_USER_ROLE
-			l: LIST[CMS_USER_ROLE]
+			l_anonymous_role, l_authenticated_role, r: CMS_USER_ROLE
+			l_roles: LIST [CMS_USER_ROLE]
 		do
-				-- Schema
+				--| Schema
 			a_storage.sql_execute_file_script (a_setup.environment.path.extended ("scripts").extended ("core.sql"))
 
+				--| Roles
+			create l_anonymous_role.make ("anonymous")
+			a_storage.save_user_role (l_anonymous_role)
 
-				-- Roles
-			create r.make ("anonymous")
-			a_storage.save_user_role (r)
-			create r.make ("authenticated")
-			r.add_permission ("create page")
-			r.add_permission ("edit own page")
-			r.add_permission ("delete own page")
-			a_storage.save_user_role (r)
+			create l_authenticated_role.make ("authenticated")
+			a_storage.save_user_role (l_authenticated_role)
 
-
-			create {ARRAYED_LIST[CMS_USER_ROLE]} l.make (1)
-			l.force (r)
-
-				-- Users
+				--| Users
 			create u.make ("admin")
 			u.set_password ("istrator#")
 			u.set_email (a_setup.site_email)
 			a_storage.new_user (u)
 
-			create u.make ("auth")
-			u.set_password ("enticated#")
-			u.set_email (a_setup.site_email)
-			u.set_roles (l)
-			a_storage.new_user (u)
+				--| Node			
+				-- FIXME: move that initialization to node module
+			l_anonymous_role.add_permission ("view any page")
+			a_storage.save_user_role (l_anonymous_role)
 
-			create u.make ("test")
-			u.set_password ("test#")
-			u.set_email (a_setup.site_email)
-			u.set_roles (l)
-			a_storage.new_user (u)
+			l_authenticated_role.add_permission ("create page")
+			l_authenticated_role.add_permission ("view any page")
+			l_authenticated_role.add_permission ("edit own page")
+			l_authenticated_role.add_permission ("delete own page")
+			a_storage.save_user_role (l_authenticated_role)
+
+
+			--| For testing purpose, to be removed later.
 
 				-- Roles, view role for testing.
 			create r.make ("view")
 			r.add_permission ("view page")
 			a_storage.save_user_role (r)
 
-			create {ARRAYED_LIST[CMS_USER_ROLE]} l.make (1)
-			l.force (r)
+			create {ARRAYED_LIST [CMS_USER_ROLE]} l_roles.make (1)
+			l_roles.force (r)
+
+			create u.make ("auth")
+			u.set_password ("enticated#")
+			u.set_email (a_setup.site_email)
+			a_storage.new_user (u)
+
+			create u.make ("test")
+			u.set_password ("test#")
+			u.set_email (a_setup.site_email)
+			a_storage.new_user (u)
 
 			create u.make ("view")
 			u.set_password ("only#")
 			u.set_email (a_setup.site_email)
-			u.set_roles (l)
+			u.set_roles (l_roles)
 			a_storage.new_user (u)
-
-				-- Test custom value
-			a_storage.set_custom_value ("abc", "123", "test")
-			a_storage.set_custom_value ("abc", "OK", "test")
 		end
 
 end

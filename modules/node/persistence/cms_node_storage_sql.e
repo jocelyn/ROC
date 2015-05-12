@@ -265,15 +265,13 @@ feature -- Helpers
 
 feature {NONE} -- Queries
 
-	sql_select_nodes_count: STRING = "SELECT count(*) FROM Nodes WHERE status != 3;"
+	sql_select_nodes_count: STRING = "SELECT count(*) FROM Nodes WHERE status != -1 ;"
 			-- Nodes count (Published and not Published)
-			-- {CMS_NODE_API}.not_published
-			-- TODO: add queries to retrieve published_nodes_count, no_published_nodes_count. etc
+			--| note: {CMS_NODE_API}.trashed = -1
 
-
-	sql_select_nodes: STRING = "SELECT * FROM Nodes WHERE status != 3;"
+	sql_select_nodes: STRING = "SELECT * FROM Nodes WHERE status != -1 ;"
 			-- SQL Query to retrieve all nodes.
-			-- {CMS_NODE_API}.not_published
+			--| note: {CMS_NODE_API}.trashed = -1
 
 	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes WHERE nid =:nid ORDER BY revision desc, publish desc LIMIT 1;"
 
