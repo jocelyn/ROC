@@ -59,8 +59,8 @@ feature -- Factory
 			a_storage.save_user_role (r)
 			create r.make ("authenticated")
 			r.add_permission ("create page")
-			r.add_permission ("edit page")
-			r.add_permission ("delete page")
+			r.add_permission ("edit own page")
+			r.add_permission ("delete own page")
 			a_storage.save_user_role (r)
 
 
@@ -75,6 +75,12 @@ feature -- Factory
 
 			create u.make ("auth")
 			u.set_password ("enticated#")
+			u.set_email (a_setup.site_email)
+			u.set_roles (l)
+			a_storage.new_user (u)
+
+			create u.make ("test")
+			u.set_password ("test#")
 			u.set_email (a_setup.site_email)
 			u.set_roles (l)
 			a_storage.new_user (u)

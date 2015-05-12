@@ -81,8 +81,8 @@ feature -- Access
 		end
 
 	status: INTEGER
-			-- Associated status for the current node
-			-- [{1,Not_Published}, {2, Published}, {3, Trash}]	
+			-- Associated status for the current node.
+			-- [{0,Not_Published}, {1, Published}, {2, Trash}]	
 
 feature -- Access		
 
@@ -218,34 +218,34 @@ feature -- Element change
 		end
 
 	mark_not_published
-			-- Set status to not_published
+			-- Set status to not_published.
 		do
-			set_status ({CMS_NODE_CONSTANTS}.not_published)
+			set_status ({CMS_NODE_API}.not_published)
 		ensure
-			status_not_published: status = {CMS_NODE_CONSTANTS}.not_published
+			status_not_published: status = {CMS_NODE_API}.not_published
 		end
 
 	mark_published
-			-- Set status to published
+			-- Set status to published.
 		do
-			set_status ({CMS_NODE_CONSTANTS}.published)
+			set_status ({CMS_NODE_API}.published)
 		ensure
-			status_published: status = {CMS_NODE_CONSTANTS}.published
+			status_published: status = {CMS_NODE_API}.published
 		end
 
 	mark_trash
 			-- Set status to published
 		do
-			set_status ({CMS_NODE_CONSTANTS}.trash)
+			set_status ({CMS_NODE_API}.trashed)
 		ensure
-			status_trash: status = {CMS_NODE_CONSTANTS}.trash
+			status_trash: status = {CMS_NODE_API}.trashed
 		end
 
 
-feature {NONE} -- Implementation
+feature {CMS_NODE_STORAGE_I} -- Selective Export
 
 	set_status (a_status: like status)
-			-- Assign `status' with `a_status'
+			-- Assign `status' with `a_status'.
 		do
 			status := a_status
 		ensure

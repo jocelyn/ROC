@@ -108,8 +108,8 @@ feature -- Access
 			error_handler.reset
 			write_information_log (generator + ".node_author")
 			create l_parameters.make (1)
-			l_parameters.put (a_id, "node_id")
-			sql_query (select_node_author, l_parameters)
+			l_parameters.put (a_id, "nid")
+			sql_query (Select_user_author, l_parameters)
 			if sql_rows_count >= 1 then
 				Result := fetch_author
 			end
@@ -152,7 +152,7 @@ feature -- Change: Node
 			error_handler.reset
 			create l_parameters.make (1)
 			l_parameters.put (l_time, "changed")
-			l_parameters.put ({CMS_NODE_CONSTANTS}.trash, "status")
+			l_parameters.put ({CMS_NODE_API}.trashed, "status")
 			l_parameters.put (a_id, "nid")
 			sql_change (sql_delete_node, l_parameters)
 		end
@@ -267,10 +267,13 @@ feature {NONE} -- Queries
 
 	sql_select_nodes_count: STRING = "SELECT count(*) FROM Nodes WHERE status != 3;"
 			-- Nodes count (Published and not Published)
+			-- {CMS_NODE_API}.not_published
 			-- TODO: add queries to retrieve published_nodes_count, no_published_nodes_count. etc
+
 
 	sql_select_nodes: STRING = "SELECT * FROM Nodes WHERE status != 3;"
 			-- SQL Query to retrieve all nodes.
+			-- {CMS_NODE_API}.not_published
 
 	sql_select_node_by_id: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed, status FROM Nodes WHERE nid =:nid ORDER BY revision desc, publish desc LIMIT 1;"
 
@@ -302,7 +305,7 @@ feature {NONE} -- Queries
 
 feature {NONE} -- Sql Queries: USER_ROLES collaborators, author
 
-	Select_user_author: STRING = "SELECT uid, name, password, salt, email, status, created, signed FROM Nodes INNER JOIN users ON nodes.author=users.uid AND users.uid = :uid;"
+	Select_user_author: STRING = "SELECT uid, name, password, salt, email, users.status, users.created, signed FROM Nodes INNER JOIN users ON nodes.author=users.uid AND nodes.nid = :nid;"
 
 	Select_node_author: STRING = "SELECT nid, revision, type, title, summary, content, format, author, publish, created, changed FROM users INNER JOIN nodes ON nodes.author=users.uid AND nodes.nid =:nid;"
 
@@ -344,14 +347,7 @@ feature {NONE} -- Implementation
 					Result.set_modification_date (l_modif_date)
 				end
 				if attached sql_read_integer_32 (12) as l_status then
-					inspect l_status
-					when {CMS_NODE_CONSTANTS}.not_published then
-						Result.mark_not_published
-					when {CMS_NODE_CONSTANTS}.published then
-						Result.mark_published
-					when {CMS_NODE_CONSTANTS}.trash then
-						Result.mark_trash
-					end
+					Result.set_status (l_status)
 				end
 			end
 		end

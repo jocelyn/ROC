@@ -150,7 +150,7 @@ feature -- HTTP Methods
 						l_id.is_integer and then
 						attached node_api.node (l_id.integer_value) as l_node
 					then
-						if api.user_has_permission (l_user, "delete " + l_node.content_type) then
+						if api.user_has_permission (l_user, "delete " + node_api.permission_scope (current_user_name (req), l_id.integer_value) + " " +  l_node.content_type) then
 							node_api.delete_node (l_node)
 							res.send (create {CMS_REDIRECTION_RESPONSE_MESSAGE}.make (req.absolute_script_url ("")))
 						else

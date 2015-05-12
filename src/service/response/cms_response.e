@@ -182,6 +182,7 @@ feature -- Permission
 	has_permission (a_permission: READABLE_STRING_GENERAL): BOOLEAN
 			-- Does current user has permission `a_permission' ?
 		do
+			api.logger.put_information (generator + ".has_permission", a_permission)
 			Result := user_has_permission (current_user (request), a_permission)
 		end
 

@@ -249,6 +249,26 @@ feature -- Access: Node
 			end
 		end
 
+	user_is_node_owner (u: READABLE_STRING_32; nid: INTEGER_64): BOOLEAN
+			-- Is the user `u' owner of the node `n'.
+		do
+			if attached {CMS_USER} node_storage.node_author (nid) as l_user then
+				Result := l_user.name.is_case_insensitive_equal (u)
+			end
+		end
+
+feature -- Permission Scope: Node
+
+	permission_scope (u: detachable READABLE_STRING_32; nid: INTEGER_64): STRING
+			-- Result 'own' if the user `u' is the owner of the node `nid', in other case
+			-- `any'.
+		do
+			Result := "any"
+			if attached u as l_u and then user_is_node_owner (l_u, nid) then
+				Result := "own"
+			end
+		end
+
 feature -- Change: Node
 
 	save_node (a_node: CMS_NODE)
@@ -278,6 +298,18 @@ feature -- Change: Node
 		do
 			node_storage.update_node (a_node)
 		end
+
+
+feature -- Node status
+
+	Not_published: INTEGER = 1
+			-- The node is not published.
+
+	Published: INTEGER = 2
+			-- The node is published.
+
+	Trashed: INTEGER = 3
+			-- The node is trashed (soft delete), ready to be deleted (physical).
 
 --	update_node_title (a_user_id: like {CMS_USER}.id; a_node_id: like {CMS_NODE}.id; a_title: READABLE_STRING_32)
 --			-- Update node title, with user identified by `a_id', with node id `a_node_id' and a new title `a_title'.
