@@ -1,0 +1,79 @@
+<!-- Updated: 12/04/2015 12:30:04.000 AM --><div class="feed">
+<ul>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/-jtyp4iengE">Re: [eiffel-users] Precompile on Linux</a>
+<div class="description">Hi, I just check if the .ecf files are in /usr/share/eiffelstudio-MM.mm/precomp/spec/unix and they are. When I look in the "Locations of configuration files" dialog in EiffelStudio, I see this: # Search paths for precompiled libraries are specified in the configuration file: # /usr/share/ei</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/-jtyp4iengE">RE: [eiffel-users] Precompile on Linux</a>
+<div class="description">This is a bug in the Unix layout then. Do you mind submitting a problem report? Thanks, Manu *From:* eiffel...@googlegroups.com [mailto:eiffel...@googlegroups.com] *On Behalf Of *Louis *Sent:* Tuesday, December 08, 2015 23:02 *To:* eiffel...@googlegroups.com *Subject:* Re: [eiffel-users]</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/ddSxnBrvhUg">Re: [eiffel-users] Re: Version of EiffelBase2 shipped with different EiffelStudio versions</a>
+<div class="description">Not really. What I need to know is when I run tests on the performance and suitability for use of EiffelBase2, do I have to repeat them with all of ES versions 15.01, 15.08 and 15.11? On 8 December 2015 at 13:52, Jocelyn Fiat <jf...@eiffelsolution.com> wrote: > As the author of EiffelBase2 does</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/ddSxnBrvhUg">RE: [eiffel-users] Re: Version of EiffelBase2 shipped with different EiffelStudio versions</a>
+<div class="description">In this particular case, it is sufficient to take any version of EiffelStudio and the EiffelBase2 version that comes with it to evaluate EiffelBase2 as the library has not really changed much in the past few years. In the general case, you should stick to one version of EiffelStudio and</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/ddSxnBrvhUg">Re: [eiffel-users] Re: Version of EiffelBase2 shipped with different EiffelStudio versions</a>
+<div class="description">But this doesn't answer my question. Which version of EiffelBase2 ships with which version of EiffelStudio? On 8 December 2015 at 13:05, Jocelyn Fiat <jf...@eiffel.com> wrote: > Hi all, > > Usually the version uploaded to iron server comes from the associated > branch > for instance > > - 15.01</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/ddSxnBrvhUg">Re: [eiffel-users] Re: Version of EiffelBase2 shipped with different EiffelStudio versions</a>
+<div class="description">Hi all, Usually the version uploaded to iron server comes from the associated branch for instance - 15.01 has almost same content as https://svn.eiffel.com/eiffelstudio/branches/Eiffel_15.01/ - ... I said "almost" because, the ecf are modified to use iron references rather than $ISE_LIBRARY/...</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/ddSxnBrvhUg">Re: [eiffel-users] Re: Version of EiffelBase2 shipped with different EiffelStudio versions</a>
+<div class="description">As the author of EiffelBase2 does not define any specific versions, I would say - EiffelStudio 14.05 ships EiffelBase2 version 14.05, and associated source code can be found at https://svn.eiffel.com/eiffelstudio/branches/Eiffel_14.05/Src/unstable/library/base2/ (last changed revision: 94979)</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/-jtyp4iengE">RE: [eiffel-users] Precompile on Linux</a>
+<div class="description">We currently only ship precompiled libraries for EiffelBase, WEL on Windows and EiffelVision2. The configuration files for those precompiled library are in a read-only folder of the EiffelStudio installation. The first time EiffelStudio tries to access $ISE_PRECOMP (which if not set resolves to</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/ddSxnBrvhUg">Re: [eiffel-users] Re: Version of EiffelBase2 shipped with different EiffelStudio versions</a>
+<div class="description">Come on - someone must know - the person who loaded it to iron, e.g. On 7 December 2015 at 12:03, Colin Adams <colinpa...@gmail.com> wrote: > I know what EiffelBase2 is. I was asking about the version in the iron > repository for each version of EiffelStudio. > > On 7 December 2015 at 11:59,</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/Vwsw67vq6ss">Re: Explaining high-level programming</a>
+<div class="description">A very interesting article Ian. I learned more by reading it. However, the title leads me to ask: Who (precisely) is the target audience to whom the plea is being made? From my point of view, I cannot see this audience, so I am asking for your view to help me identify the audience. Thanks,</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/Vwsw67vq6ss">Explaining high-level programming</a>
+<div class="description">On 4 Dec 2015, at 00:24, Bertrand Meyer <Bertran...@inf.ethz.ch> wrote: 3. The community should help spread Eiffel. The last point is particularly important. The user community needs to grow; if it moves up to the next level then we at Eiffel Software will be able to perform many more</div>
+</li>
+<li>
+<div class="date"> Dec 08</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/-jtyp4iengE">Precompile on Linux</a>
+<div class="description">Recently I installed EiffelStudio 15.08 on my Xubuntu laptop, with an assist from Louis M who showed me how to install it using apt-get. In the past, after extracting everything in the .tar.bz archive, I would run the supplied precompile script to produce the precompiled libraries I needed. The</div>
+</li>
+<li>
+<div class="date"> Dec 07</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/4BS09rbY6UY">RE: [eiffel-users] Maximum capacity of a TUPLE</a>
+<div class="description">If you are looking at TUPLE with more than 20 entries, I think I would consider using LIST or ARRAY for storing data. The issue is not so much on the TUPLE capacity (which has the same limit as a SPECIAL object) but on the number of class types any type declaration. This is a limit for all</div>
+</li>
+<li>
+<div class="date"> Dec 07</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/YgyWglEEN3A">Re: [eiffel-users] Does {MEMORY}.collection_off reset the progress of the garbage collector?</a>
+<div class="description">Thanks, that was what I was looking for.</div>
+</li>
+<li>
+<div class="date"> Dec 07</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/4BS09rbY6UY">Maximum capacity of a TUPLE</a>
+<div class="description">The header comment to {TUPLE}.plus says the result can be Void if the result exceeds the capacity of a TUPLE. What is this maximum capacity? (without knowing it is is impossible to prove the result of such a concatenation will be attached).</div>
+</li>
+<liv class="nav"><a href="/feed_aggregation/forum">See more ...</a></li>
+</ul>
