@@ -72,7 +72,6 @@ feature {NONE} -- Initialization
 			l_module: CMS_MODULE
 			l_enabled_modules: CMS_MODULE_COLLECTION
 		do
-			api.register_hooks (hooks)
 			l_enabled_modules := api.enabled_modules
 			across
 				l_enabled_modules as ic
@@ -112,26 +111,6 @@ feature -- Access
 			if not Result.is_empty and then Result[1] = '/' then
 				Result.remove_head (1)
 			end
-		end
-
-feature -- Internationalization (i18n)
-
-	translation (a_text: READABLE_STRING_GENERAL; opts: detachable CMS_API_OPTIONS): STRING_32
-			-- Translated text `a_text' according to expected context (lang, ...)
-			-- and adapt according to options eventually set by `opts'.
-		do
-			to_implement ("Implement i18n support [2015-may]")
-			Result := a_text.as_string_32
-		end
-
-	formatted_string (a_text: READABLE_STRING_GENERAL; args: TUPLE): STRING_32
-			-- Format `a_text' using arguments `args'.
-			--| ex: formatted_string ("hello $1, see page $title.", ["bob", "contact"] -> "hello bob, see page contact"
-		local
-			l_formatter: CMS_STRING_FORMATTER
-		do
-			create l_formatter
-			Result := l_formatter.formatted_string (a_text, args)
 		end
 
 feature -- API
@@ -897,6 +876,22 @@ feature -- Menu: change
 			m.extend (lnk)
 		end
 
+feature -- Internationalization (i18n)
+
+	translation (a_text: READABLE_STRING_GENERAL; opts: detachable CMS_API_OPTIONS): STRING_32
+			-- Translated text `a_text' according to expected context (lang, ...)
+			-- and adapt according to options eventually set by `opts'.
+		do
+			Result := api.translation (a_text, opts)
+		end
+
+	formatted_string (a_text: READABLE_STRING_GENERAL; args: TUPLE): STRING_32
+			-- Format `a_text' using arguments `args'.
+			--| ex: formatted_string ("hello $1, see page $title.", ["bob", "contact"] -> "hello bob, see page contact"
+		do
+			Result := api.formatted_string (a_text, args)
+		end
+
 feature -- Message
 
 	add_message (a_msg: READABLE_STRING_8; a_category: detachable READABLE_STRING_8)
@@ -983,6 +978,26 @@ feature -- Theme
 				to_implement ("Check how to add the Retry-after, http://tools.ietf.org/html/rfc7231#section-6.6.4 and http://tools.ietf.org/html/rfc7231#section-7.1.3")
 			end
 		end
+
+feature -- Theme helpers
+
+	wsf_theme: WSF_THEME
+			-- WSF Theme from CMS `theme' for Current response.
+		local
+			t: like internal_wsf_theme
+		do
+			t := internal_wsf_theme
+			if t = Void then
+				create {CMS_TO_WSF_THEME} t.make (Current, theme)
+				internal_wsf_theme := t
+			end
+			Result := t
+		end
+
+feature {NONE} -- Theme helpers		
+
+	internal_wsf_theme: detachable WSF_THEME
+			-- Once per object for `wsf_theme'.
 
 feature -- Element Change
 
