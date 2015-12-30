@@ -12,8 +12,12 @@ inherit
 		rename
 			module_api as file_upload_api
 		redefine
-			install
+			install,
+			register_hooks
 		end
+
+	CMS_HOOK_BLOCK
+	CMS_HOOK_MENU_SYSTEM_ALTER
 
 create
 	make
@@ -67,4 +71,31 @@ feature -- Module Management
 				Precursor (api)
 			end
 		end
+
+feature -- Hooks
+
+	register_hooks (a_response: CMS_RESPONSE)
+			-- register the hooks
+		do
+			a_response.subscribe_to_menu_system_alter_block(Current)
+			a_response.subscribe_to_block_hook(Current)
+		end
+
+	block_list: ITERABLE [like {CMS_BLOCK}.name]
+        do
+            -- List of block names, managed by current object.
+        end
+
+    get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+        do
+            -- Get block object identified by `a_block_id' and associate with `a_response'.
+        end
+
+    menu_system_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
+        local
+            link: CMS_LOCAL_LINK
+        do
+            create link.make ("Files", "/uploaded_files")
+            a_menu_system.primary_menu.extend (link)
+        end
 end
