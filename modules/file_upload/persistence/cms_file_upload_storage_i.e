@@ -14,7 +14,7 @@ feature -- Access
 		deferred
 		end
 
-	files: LIST [CMS_NODE]
+	files: LIST [CMS_NODE]
 			-- List of files
 		deferred
 		end

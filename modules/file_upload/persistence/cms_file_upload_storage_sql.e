@@ -14,6 +14,17 @@ inherit
 create
 	make
 
+feature
 
+	files_count: INTEGER_64
+			-- Precursor
+		do
+
+		end
+
+	files: LIST [CMS_NODE]
+		do
+			
+		end
 
 end
