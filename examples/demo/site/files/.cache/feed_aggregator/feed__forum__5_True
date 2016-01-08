@@ -1,0 +1,64 @@
+<!-- Updated: 12/29/2015 9:02:40.000 PM --><div class="feed">
+<ul>
+<li>
+<div class="date"> Jan 07</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/NeZjrW4IrYI">RE: [eiffel-users] Book suggestion</a>
+<div class="description">I agree with each of the three you’ve mentioned: 1. Thick-client GUI 2. Browser/Webserver/Web-services 3. Mobile applications (phones/tablets) I will add: RaspberryPi! The RaspberryPi is relatively young and needs Eiffel. I have seen folks ganging these little $5 PC’s together to produce</div>
+</li>
+<li>
+<div class="date"> Jan 07</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/NeZjrW4IrYI">Book suggestion</a>
+<div class="description">What the world needs, besides peace, is a new edition of the excellent book *Windows Programming Made Easy* by Maughan and Simon, rewritten for Vision2. I've looked in vain for an equally thorough reference for Vision2. The Vision2 section at docs.eiffel.com is good as far as it goes, but nowhere</div>
+</li>
+<li>
+<div class="date"> Jan 06</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/uDHIDsjbQX8">Re: [eiffel-users] Easiest way to do type comparisons?</a>
+<div class="description">I've been looking at the code. There are around 1,500 lines of code affected, and in fact, a pretty high dependence on using type ids rather than testing types of objects. Fixing this is going to be major surgery, but I have to do something because it's broken every project we have in Eiffel,</div>
+</li>
+<li>
+<div class="date"> Jan 06</div>
+<a href="http://stackoverflow.com/questions/34635913/creating-dynamic-objects-eiffel">Creating dynamic objects (Eiffel)</a>
+<div class="description"><p>I have to find a way to create objects dynamically, that means the user can decide how many objects to create once the program starts. What I tried to do is:</p>
+
+<pre><code>                if count = 6 then
+                create player1.player
+                create player2.player 
+                create player3.player
+                create player4.player
+                create player5.player
+                create player6.player
+                  elseif count &gt; 4 then
+                    create player1.player
+                    create player2.player 
+                    create player3.player
+                    create player4.player
+                    create player5.player
+                      elseif count &gt; 3 then
+                        create player1.player
+                        create player2.player 
+                        create player3.player
+                        create player4.player
+                          elseif count &gt; 2 then
+                            create player1.player
+                            create player2.player 
+                            create player3.player
+                           else
+                             create player1.player
+                             create player2.player 
+               end
+</code></pre>
+
+<p>Once the user has choosen the number of players, the variable count gets updated and the feature that creates the objects gets called.</p>
+
+<p>I used this kind of brute force method, instead of a loop, because I need the "names" of the objects, I have to called them again in the program.</p>
+
+<p>Anyways the compiler gives me a VEVI error, variable is not properly set.
+Some help?</p></div>
+</li>
+<li>
+<div class="date"> Jan 05</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/uDHIDsjbQX8">RE: [eiffel-users] Easiest way to do type comparisons?</a>
+<div class="description">In the old way, you will get the detachable type ID. In the new way (only available in experimental mode), you will always get an attached type ID. This is why, even if you are increasing the size of your table which should have a minimal impact on performance, it will work now and then. ></div>
+</li>
+<liv class="nav"><a href="/feed_aggregation/forum">See more ...</a></li>
+</ul>

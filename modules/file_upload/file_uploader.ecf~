@@ -6,7 +6,7 @@
 			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
 		</option>
 		<setting name="console_application" value="true"/>
-		<!-- <precompile name="base_pre" location="$ISE_PRECOMP\base-safe.ecf"/> -->
+		<precompile name="base_pre" location="$ISE_PRECOMP\base-safe.ecf"/>
 		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
 		<library name="cms" location="\home\fmurer\Documents\EWF_ROC\ROC\cms-safe.ecf"/>
 		<library name="cms_model" location="\home\fmurer\Documents\EWF_ROC\ROC\library\model\cms_model-safe.ecf"/>

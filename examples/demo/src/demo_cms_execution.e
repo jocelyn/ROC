@@ -92,6 +92,10 @@ feature -- CMS modules
 
 			create {CMS_SESSION_AUTH_MODULE} m.make
 			a_setup.register_module (m)
+
+				-- uploader
+			create {CMS_FILE_UPLOAD} m.make
+			a_setup.register_module (m)
 		end
 
 end

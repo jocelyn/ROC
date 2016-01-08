@@ -1,0 +1,138 @@
+<!-- Updated: 12/29/2015 9:02:38.000 PM --><div class="feed">
+<ul>
+<li>
+<div class="date">2015, Nov 17</div>
+<a href="https://room.eiffel.com/blog/colinadams/some_lazy_data_structures_implemented_in_eiffel_part_i_iterating_the_calkinwilf_tree">Some lazy data structures implemented in Eiffel - Part I - Iterating the Calkin-Wilf tree</a>
+<div class="description"><p>This is the first part of a series in which I intend to make some explorations of lazy, infinite data structures in Eiffel. If you want to compile the code in these articles, you will need EiffelStudio 15.11 or later.
+</p><p>In this first article, I am going to iterate an infinite data structure - the strictly-positive rational numbers, represented by an infinite tree - <a href="https://en.wikipedia.org/wiki/Calkin%E2%80%93Wilf_tree" class="external text" title="https://en.wikipedia.org/wiki/Calkin%E2%80%93Wilf_tree">The Calkin-Wilf tree</a>. The easiest way to follow the code is to view it directly on <a href="https://github.com/colin-adams/lazy_eiffel" class="external text" title="https://github.com/colin-adams/lazy_eiffel">GitHub</a>. An alternative is to checkout the repository and compile it in EiffelStudio. To do the latter (instructions are for Linux from a bash terminal, but should be similar for other O/S I think):
+</p>
+<ol><li> git clone git@github.com:colin-adams/lazy_eiffel.git
+</li><li> git checkout V1
+</li><li> cd lazy_eiffel/examples/calkin_wilf/src
+</li><li> estudio calkin_wilf.ecf &amp;
+</li><li> Press OK
+</li></ol>
+<p>The first class worth looking at briefly is <span class="geshifilter"><code class="eiffel geshifilter-eiffel">LAZY_BINARY_TREE</code></span>. This represents a single node in an infinite binary tree, together with a link to it's parent, and two <span class="geshifilter"><code class="eiffel geshifilter-eiffel"><a href="http://www.google.com/search?q=site%3Ahttp%3A%2F%2Fdocs.eiffel.com%2Feiffelstudio%2Flibraries+function&amp;btnI=I%27m+Feeling+Lucky"><span style="color: #800000">FUNCTION</span></a></code></span>s to find the left and right children. Incidentally, you may be surprised at the syntax used for declaring these <span class="geshifilter"><code class="eiffel geshifilter-eiffel"><a href="http://www.google.com/search?q=site%3Ahttp%3A%2F%2Fdocs.eiffel.com%2Feiffelstudio%2Flibraries+function&amp;btnI=I%27m+Feeling+Lucky"><span style="color: #800000">FUNCTION</span></a></code></span>s unless you have already read <a href="https://groups.google.com/forum/#!topic/eiffel-users/poTM7aUIa4I" class="external text" title="https://groups.google.com/forum/#!topic/eiffel-users/poTM7aUIa4I">this thread</a>. This is why 15.11 or later is needed to compile the code. I think it's worth showing one of those agents here:
+</p><p><div class="geshifilter"><div class="eiffel geshifilter-eiffel" style="font-family:monospace;">&nbsp; &nbsp; &nbsp; &nbsp; left_child_function<span style="color: #600000;">:</span> <a href="http://www.google.com/search?q=site%3Ahttp%3A%2F%2Fdocs.eiffel.com%2Feiffelstudio%2Flibraries+function&amp;btnI=I%27m+Feeling+Lucky"><span style="color: #800000">FUNCTION</span></a> <span style="color: #FF0000;">&#91;</span>LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>G<span style="color: #FF0000;">&#93;</span>, LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>G<span style="color: #FF0000;">&#93;</span><span style="color: #FF0000;">&#93;</span></div></div>
+</p><p>This syntax is starting to look lightweight. Looking quite comparable to Haskell, for example (<span class="geshifilter"><code class="text geshifilter-text">leftChildFunction :: LazyBinaryTree a -&gt; LazyBinaryTree a</code></span>), and none of that horrible camelCase.
+</p><p>Then let's look at the <span class="geshifilter"><code class="eiffel geshifilter-eiffel">CALKIN_WILF</code></span> tree itself. The core of the class is a root node, two functions to navigate from any node in the tree to the left and right children (or to lazily build the tree structure, depending on how you want to look at it), and a creation procedure to initialize root to 1/1.
+</p><p><div class="geshifilter"><div class="eiffel geshifilter-eiffel" style="font-family:monospace;"><span style="color: #0600FF; font-weight: bold;">feature</span> <span style="color: #FF0000;">&#123;</span><a href="http://www.google.com/search?q=site%3Ahttp%3A%2F%2Fdocs.eiffel.com%2Feiffelstudio%2Flibraries+none&amp;btnI=I%27m+Feeling+Lucky"><span style="color: #800000">NONE</span></a><span style="color: #FF0000;">&#125;</span> <span style="color: #008000; font-style: italic;">-- Initialization</span><br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; make<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #008000; font-style: italic;">-- Create `root'.</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0600FF; font-weight: bold;">do</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; left_child_agent <span style="color: #600000;">:=</span> <span style="color: #0600FF; font-weight: bold;">agent</span> left_child<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; right_child_agent <span style="color: #600000;">:=</span> <span style="color: #0600FF; font-weight: bold;">agent</span> right_child<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0600FF; font-weight: bold;">create</span> <span style="color: #603000;">root</span>.<span style="color: #000060;">make</span> <span style="color: #FF0000;">&#40;</span><span style="color: #FF0000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">create</span> <span style="color: #FF0000;">&#123;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#125;</span>.<span style="color: #000060;">make</span> <span style="color: #FF0000;">&#40;</span><span style="color: #FF0000;">1</span>, <span style="color: #FF0000;">1</span><span style="color: #FF0000;">&#41;</span><span style="color: #FF0000;">&#41;</span>, <span style="color: #800080;">Void</span>, left_child_agent, right_child_agent<span style="color: #FF0000;">&#41;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; start<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0600FF; font-weight: bold;">end</span><br />
+<br />
+<span style="color: #0600FF; font-weight: bold;">feature</span> <span style="color: #008000; font-style: italic;">-- Access</span><br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #603000;">root</span><span style="color: #600000;">:</span> LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #008000; font-style: italic;">-- 1/1</span><br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; left_child_agent<span style="color: #600000;">:</span> <a href="http://www.google.com/search?q=site%3Ahttp%3A%2F%2Fdocs.eiffel.com%2Feiffelstudio%2Flibraries+function&amp;btnI=I%27m+Feeling+Lucky"><span style="color: #800000">FUNCTION</span></a> <span style="color: #FF0000;">&#91;</span>LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span>, LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span><span style="color: #FF0000;">&#93;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #008000; font-style: italic;">-- Function from a node to its left child</span><br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; right_child_agent<span style="color: #600000;">:</span> <a href="http://www.google.com/search?q=site%3Ahttp%3A%2F%2Fdocs.eiffel.com%2Feiffelstudio%2Flibraries+function&amp;btnI=I%27m+Feeling+Lucky"><span style="color: #800000">FUNCTION</span></a> <span style="color: #FF0000;">&#91;</span>LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span>, LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span><span style="color: #FF0000;">&#93;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #008000; font-style: italic;">-- Function from a node to its left child</span><br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; left_child <span style="color: #FF0000;">&#40;</span>a_node<span style="color: #600000;">:</span> LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span><span style="color: #FF0000;">&#41;</span><span style="color: #600000;">:</span> LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #008000; font-style: italic;">-- Left child of `a_node'</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0600FF; font-weight: bold;">do</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0600FF; font-weight: bold;">create</span> <span style="color: #800080;">Result</span>.<span style="color: #000060;">make</span> <span style="color: #FF0000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">create</span> <span style="color: #FF0000;">&#123;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#125;</span>.<span style="color: #000060;">make</span> <span style="color: #FF0000;">&#40;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; a_node.<span style="color: #000060;">item</span>.<span style="color: #000060;">numerator</span>, a_node.<span style="color: #000060;">item</span>.<span style="color: #000060;">numerator</span> <span style="color: #600000;">+</span> a_node.<span style="color: #000060;">item</span>.<span style="color: #000060;">denominator</span><span style="color: #FF0000;">&#41;</span>,<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; a_node, left_child_agent, right_child_agent<span style="color: #FF0000;">&#41;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0600FF; font-weight: bold;">end</span><br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; right_child <span style="color: #FF0000;">&#40;</span>a_node<span style="color: #600000;">:</span> LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span><span style="color: #FF0000;">&#41;</span><span style="color: #600000;">:</span> LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #008000; font-style: italic;">-- Right child of `a_node'</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0600FF; font-weight: bold;">do</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0600FF; font-weight: bold;">create</span> <span style="color: #800080;">Result</span>.<span style="color: #000060;">make</span> <span style="color: #FF0000;">&#40;</span><span style="color: #0600FF; font-weight: bold;">create</span> <span style="color: #FF0000;">&#123;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#125;</span>.<span style="color: #000060;">make</span> <span style="color: #FF0000;">&#40;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; a_node.<span style="color: #000060;">item</span>.<span style="color: #000060;">numerator</span> <span style="color: #600000;">+</span> a_node.<span style="color: #000060;">item</span>.<span style="color: #000060;">denominator</span>, a_node.<span style="color: #000060;">item</span>.<span style="color: #000060;">denominator</span><span style="color: #FF0000;">&#41;</span>,<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; a_node, left_child_agent, right_child_agent<span style="color: #FF0000;">&#41;</span><br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0600FF; font-weight: bold;">end</span></div></div>
+</p><p>However, I muddled this nice little picture by inheriting from <span class="geshifilter"><code class="eiffel geshifilter-eiffel"><a href="http://www.google.com/search?q=site%3Ahttp%3A%2F%2Fdocs.eiffel.com%2Feiffelstudio%2Flibraries+linear&amp;btnI=I%27m+Feeling+Lucky"><span style="color: #800000">LINEAR</span></a> <span style="color: #FF0000;">&#91;</span>LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span><span style="color: #FF0000;">&#93;</span></code></span>. So the class <span class="geshifilter"><code class="eiffel geshifilter-eiffel">CALKIN_WILF</code></span> <em>has</em> a lazy tree of rationals, and <em>is</em> a linear iteration of them. In the root class <span class="geshifilter"><code class="eiffel geshifilter-eiffel">CALKIN_WILF_DEMO_ROOT</code></span> we simply print the first 100 rational numbers (I could have made the program take an argument) using a <span class="geshifilter"><code class="eiffel geshifilter-eiffel"><a href="http://www.google.com/search?q=site%3Ahttp%3A%2F%2Fdocs.eiffel.com%2Feiffelstudio%2Flibraries+linear_iterator&amp;btnI=I%27m+Feeling+Lucky"><span style="color: #800000">LINEAR_ITERATOR</span></a> <span style="color: #FF0000;">&#91;</span>LAZY_BINARY_TREE <span style="color: #FF0000;">&#91;</span>RATIONAL_NUMBER<span style="color: #FF0000;">&#93;</span><span style="color: #FF0000;">&#93;</span></code></span>. However, the iteration is <em>not</em> in numerical order. In a future post we'll see other ways of iterating the rationals.
+</p><p>The really interesting thing (to me) about the Calkin-Wilf tree is the way I did a breadth-first traversal of this infinite tree. It turns out that the index in the linear structure, when translated into binary, can be considered as a set of instructions to move through the tree. You ignore all leading zeros. At the first one, move to the root. Then every time you see a zero, you take the left child, and every time you see a one, you take the right child. Lovely!
+</p></div>
+</li>
+<li>
+<div class="date">2015, Sep 15</div>
+<a href="http://feedproxy.google.com/~r/BertrandMeyer/~3/vAyEwWESHTY/">Design by Contract: ACM Webinar this Thursday</a>
+<div class="description"><p>A third ACM webinar this year (after two on agile methods): I will be providing a general introduction to Design by Contract. The date is this coming Thursday, September 17, and the time is noon New York (18 Paris/Zurich, 17 London, 9 Los Angeles, see here for hours elsewhere). Please tune in! The event is [&#8230;]</p>
+<p>The post <a rel="nofollow" href="https://bertrandmeyer.com/2015/09/15/design-by-contract-acm-webinar-this-thursday/">Design by Contract: ACM Webinar this Thursday</a> appeared first on <a rel="nofollow" href="https://bertrandmeyer.com">Bertrand Meyer&#039;s technology+ blog</a>.</p></div>
+</li>
+<li>
+<div class="date">2015, Jan 21</div>
+<a href="http://feedproxy.google.com/~r/BertrandMeyer/~3/zNoU82qSoBU/">Framing the frame problem (new paper)</a>
+<div class="description"><p>Among the open problems of verification, particularly the verification of object-oriented programs, one of the most vexing is framing: how to specify and verify what programs element do not change. Continuing previous work, this article presents a &#8220;double frame inference&#8221; method, automatic on both sides the specification and verification sides. There is no need to [&#8230;]</p>
+<p>The post <a rel="nofollow" href="https://bertrandmeyer.com/2015/01/21/framing-the-frame-problem-new-paper/">Framing the frame problem (new paper)</a> appeared first on <a rel="nofollow" href="https://bertrandmeyer.com">Bertrand Meyer&#039;s technology+ blog</a>.</p></div>
+</li>
+<li>
+<div class="date">2015, Jan 21</div>
+<a href="http://feedproxy.google.com/~r/BertrandMeyer/~3/gYfn3TjKVzA/">Detecting deadlock automatically? (New paper)</a>
+</li>
+<li>
+<div class="date">2015, Jan 11</div>
+<a href="https://room.eiffel.com/blog/conaclos/a_colored_year_on_the_web_for_eiffel">A colored year on the web for Eiffel</a>
+<div class="description"><p>Happy new year!
+</p><p>ACE, Prism, and Rouge now support the syntax highlighting of the Eiffel language.
+</p>
+<table id="toc" class="toc" summary="Contents"><tr><td><div id="toctitle"><strong>Contents</strong></div>
+<div id="tocbody">
+<ul>
+<li class="toclevel-1"><a href="#Prism"><span class="tocnumber">1</span> <span class="toctext">Prism</span></a></li>
+<li class="toclevel-1"><a href="#ACE_editor"><span class="tocnumber">2</span> <span class="toctext">ACE editor</span></a></li>
+<li class="toclevel-1"><a href="#Rouge"><span class="tocnumber">3</span> <span class="toctext">Rouge</span></a></li>
+<li class="toclevel-1"><a href="#Other_syntax_highlighters"><span class="tocnumber">4</span> <span class="toctext">Other syntax highlighters</span></a></li>
+</ul></div>
+</td></tr></table><a name="Prism"></a><h2> <span class="mw-headline"> Prism </span></h2>
+<p><a href="http://prismjs.com/" class="external text" title="http://prismjs.com/">Prism</a> is by-design a lightweight syntax highlighter for the web.
+It is very simple to use, and the <a href="http://prismjs.com/download.html" class="external text" title="http://prismjs.com/download.html">download page</a> enables to get only what you need. It proposes interesting add-ons (Line numbers, File Highlight, ...).
+</p><p>The library is usable with a bench of tools, including <a href="https://wordpress.org/" class="external text" title="https://wordpress.org/">Wordpress</a> and <a href="http://jekyllrb.com/" class="external text" title="http://jekyllrb.com/">Jekyll</a>.
+</p><p>You can test the highlighting <a href="http://prismjs.com/test.html" class="external text" title="http://prismjs.com/test.html">here</a>. The Eiffel support should be full, including the verbatim options.
+</p><p>If you note any issues, you can report it on my <a href="https://github.com/Conaclos/prism" class="external text" title="https://github.com/Conaclos/prism">github fork</a>.
+</p><p>I have commited a <a href="https://github.com/PrismJS/prism/pull/471" class="external text" title="https://github.com/PrismJS/prism/pull/471">Pull Request</a> to enable class name highlighting.
+Please feel free to express your support in the discussion thread of the <a href="https://github.com/PrismJS/prism/pull/471" class="external text" title="https://github.com/PrismJS/prism/pull/471">Pull Request</a>.
+The PR is waiitng for author agreement since January...
+</p>
+<a name="ACE_editor"></a><h2> <span class="mw-headline"> ACE editor </span></h2>
+<p><a href="http://ace.c9.io/" class="external text" title="http://ace.c9.io/">ACE Editor</a> is certainly the most use web-based code editor.
+A bench of web applications use ACE including:
+</p>
+<ul><li> the <a href="https://help.github.com/articles/editing-files-in-your-repository/" class="external text" title="https://help.github.com/articles/editing-files-in-your-repository/">Github web editor</a>
+</li><li> the <a href="https://c9.io/" class="external text" title="https://c9.io/">Cloud9 web IDE</a> 
+</li><li> <a href="http://codecombat.com/" class="external text" title="http://codecombat.com/">Code Combat</a>, a game to learn programming basis
+</li><li> and <a href="https://ace.c9.io/#nav=production" class="external text" title="https://ace.c9.io/#nav=production">more</a>
+</li></ul>
+<p>The support of Eiffel is not full. In particular, the verbatim options and multiple-line strings are not supported.
+</p><p>If you note any issues, you can report it on my <a href="https://github.com/Conaclos/ace" class="external text" title="https://github.com/Conaclos/ace">github fork</a>.
+</p>
+<a name="Rouge"></a><h2> <span class="mw-headline"> Rouge </span></h2>
+<p>Rouge is a recent syntax highlighter increasing in popularity.
+It is compatible with the stylesheets of Pygments.
+</p><p>It is used by:
+</p>
+<ul><li> <a href="https://about.gitlab.com/" class="external text" title="https://about.gitlab.com/">Gitlab</a>
+</li><li> <a href="http://kramdown.gettalong.org/" class="external text" title="http://kramdown.gettalong.org/">krandown</a>, a markdown parser (anoption must be enabled)
+</li><li> <a href="https://github.com/vmg/redcarpet" class="external text" title="https://github.com/vmg/redcarpet">RedCarpet</a>, another markdown parser
+</li><li> the static site builder <a href="https://middlemanapp.com/" class="external text" title="https://middlemanapp.com/">Middleman</a>
+</li></ul>
+<p>The support of Eiffel is not full. In particular, the verbatim options are not supported.
+</p><p>If you note any issues, you can report it on my <a href="https://github.com/Conaclos/rouge" class="external text" title="https://github.com/Conaclos/rouge">github fork</a>.
+</p>
+<a name="Other_syntax_highlighters"></a><h2> <span class="mw-headline"> Other syntax highlighters </span></h2>
+<p>Some tools need updates in order to fully support the highlighting of Eiffel.
+For instance:
+</p>
+<ul><li> <a href="https://codemirror.net/" class="external text" title="https://codemirror.net/">Code Mirror</a>, a web-based code editor
+</li><li> <a href="http://pygments.org/" class="external text" title="http://pygments.org/">Pygments</a>
+</li><li> <a href="https://github.com/textmate/eiffel.tmbundle" class="external text" title="https://github.com/textmate/eiffel.tmbundle">TexMate</a>, (used also by <a href="https://github.com/github/linguist" class="external text" title="https://github.com/github/linguist">Github Linguist</a>
+</li><li> <a href="http://qbnz.com/highlighter/" class="external text" title="http://qbnz.com/highlighter/">GeSHi</a>
+</li></ul>
+<p>Enjoy&nbsp;;)
+</p></div>
+</li>
+<liv class="nav"><a href="/feed_aggregation/news">See more ...</a></li>
+</ul>
