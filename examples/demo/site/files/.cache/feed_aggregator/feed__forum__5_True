@@ -1,64 +1,29 @@
-<!-- Updated: 12/29/2015 9:02:40.000 PM --><div class="feed">
+<!-- Updated: 01/10/2016 12:50:45.000 PM --><div class="feed">
 <ul>
 <li>
-<div class="date"> Jan 07</div>
-<a href="https://groups.google.com/d/topic/eiffel-users/NeZjrW4IrYI">RE: [eiffel-users] Book suggestion</a>
-<div class="description">I agree with each of the three you’ve mentioned: 1. Thick-client GUI 2. Browser/Webserver/Web-services 3. Mobile applications (phones/tablets) I will add: RaspberryPi! The RaspberryPi is relatively young and needs Eiffel. I have seen folks ganging these little $5 PC’s together to produce</div>
+<div class="date"> Jan 11</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/mCVwJQ21QBA">SCOOP &amp; Contracts</a>
+<div class="description">Recently, I was reading a research paper from a Canadian university talking about applying something like SCOOP to Java. Because Java does not have Design-by-Contract, they wanted to build in a new keyword (like "require") called "await". From the writers point of view, the require contract was</div>
 </li>
 <li>
-<div class="date"> Jan 07</div>
-<a href="https://groups.google.com/d/topic/eiffel-users/NeZjrW4IrYI">Book suggestion</a>
-<div class="description">What the world needs, besides peace, is a new edition of the excellent book *Windows Programming Made Easy* by Maughan and Simon, rewritten for Vision2. I've looked in vain for an equally thorough reference for Vision2. The Vision2 section at docs.eiffel.com is good as far as it goes, but nowhere</div>
+<div class="date"> Jan 11</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/7HR-z0DVklU">General Question: Object Persistence Mechanism</a>
+<div class="description">NEED: An innate, compiler-known, object persistence mechanism, whereby objects are tracked for version (at design-time), version-updating (at run-time comparative between memory object and persisted object), and attribute change auto-persist. What would be nice is something akin to the Design-by</div>
 </li>
 <li>
-<div class="date"> Jan 06</div>
-<a href="https://groups.google.com/d/topic/eiffel-users/uDHIDsjbQX8">Re: [eiffel-users] Easiest way to do type comparisons?</a>
-<div class="description">I've been looking at the code. There are around 1,500 lines of code affected, and in fact, a pretty high dependence on using type ids rather than testing types of objects. Fixing this is going to be major surgery, but I have to do something because it's broken every project we have in Eiffel,</div>
+<div class="date"> Jan 11</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/BouQ6JU-fQ4">RE: [eiffel-users] Solving OOSC 2/E E7.3</a>
+<div class="description">In addition to Colin's reply, "is" is no longer used, as it is unnecessary. The functions sqrt and atan are in classes SINGLE_MATH or DOUBLE_MATH which are interfaces to the C library functions defined in math.h. Peter Horan -----Original Message----- From: eiffel...@googlegroups.com</div>
 </li>
 <li>
-<div class="date"> Jan 06</div>
-<a href="http://stackoverflow.com/questions/34635913/creating-dynamic-objects-eiffel">Creating dynamic objects (Eiffel)</a>
-<div class="description"><p>I have to find a way to create objects dynamically, that means the user can decide how many objects to create once the program starts. What I tried to do is:</p>
-
-<pre><code>                if count = 6 then
-                create player1.player
-                create player2.player 
-                create player3.player
-                create player4.player
-                create player5.player
-                create player6.player
-                  elseif count &gt; 4 then
-                    create player1.player
-                    create player2.player 
-                    create player3.player
-                    create player4.player
-                    create player5.player
-                      elseif count &gt; 3 then
-                        create player1.player
-                        create player2.player 
-                        create player3.player
-                        create player4.player
-                          elseif count &gt; 2 then
-                            create player1.player
-                            create player2.player 
-                            create player3.player
-                           else
-                             create player1.player
-                             create player2.player 
-               end
-</code></pre>
-
-<p>Once the user has choosen the number of players, the variable count gets updated and the feature that creates the objects gets called.</p>
-
-<p>I used this kind of brute force method, instead of a loop, because I need the "names" of the objects, I have to called them again in the program.</p>
-
-<p>Anyways the compiler gives me a VEVI error, variable is not properly set.
-Some help?</p></div>
+<div class="date"> Jan 11</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/BouQ6JU-fQ4">Re: [eiffel-users] Solving OOSC 2/E E7.3</a>
+<div class="description">The indexing clause has been replaced by the note clause (just a change of keyword). You might try changing the configuration to use transitional syntax instead of standard syntax. On 11 January 2016 at 09:46, <sagyo1...@gmail.com> wrote: > Hi, everyone. > > I'm reading the japanese version of</div>
 </li>
 <li>
-<div class="date"> Jan 05</div>
-<a href="https://groups.google.com/d/topic/eiffel-users/uDHIDsjbQX8">RE: [eiffel-users] Easiest way to do type comparisons?</a>
-<div class="description">In the old way, you will get the detachable type ID. In the new way (only available in experimental mode), you will always get an attached type ID. This is why, even if you are increasing the size of your table which should have a minimal impact on performance, it will work now and then. ></div>
+<div class="date"> Jan 11</div>
+<a href="https://groups.google.com/d/topic/eiffel-users/BouQ6JU-fQ4">Solving OOSC 2/E E7.3</a>
+<div class="description">Hi, everyone. I'm reading the japanese version of Object-Oriented Software Construction 2/E. I tried to build the code of "7.5.4 class" in EiffelStudio 15.11 and it raises some build errors. My question is: 1) Is the "indexing description:" description disposed? 2) Is the "function: syntax</div>
 </li>
 <liv class="nav"><a href="/feed_aggregation/forum">See more ...</a></li>
 </ul>

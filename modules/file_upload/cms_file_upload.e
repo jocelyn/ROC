@@ -18,8 +18,6 @@ inherit
 
 	CMS_HOOK_MENU_SYSTEM_ALTER
 
-	-- WSF_ROUTED_URI_TEMPLATE_HELPER
-
 	SHARED_EXECUTION_ENVIRONMENT
 
 create
@@ -47,7 +45,7 @@ feature {CMS_API} -- Module Initialization
 			Precursor (api)
 		end
 
-feature {CMS_API }-- Module management
+feature {CMS_API}-- Module management
 
 	install (api: CMS_API)
 			-- install the module
@@ -83,7 +81,7 @@ feature -- Access: router
 			www: WSF_FILE_SYSTEM_HANDLER
 		do
 
-			map_uri_template_agent (a_router, "/upload{?nb}", agent execute_upload_handler, void)
+			map_uri_template_agent (a_router, "/upload{?nb}", agent execute_upload, void)
 
 			create www.make_with_path (document_root)
 			www.set_directory_index (<<"index.html">>)
@@ -113,7 +111,7 @@ feature -- Hooks
 		local
 			link: CMS_LOCAL_LINK
 		do
-			create link.make ("Upload", "/upload")
+			create link.make ("Upload", "upload/")
 			a_menu_system.primary_menu.extend (link)
 		end
 
@@ -122,13 +120,16 @@ feature -- Configuration
 	document_root: PATH
 			-- Document root to look for files or directories
 		once
-			Result := execution_environment.current_working_path.extended ("docs")
+			Result := execution_environment.current_working_path.extended ("site")
 		end
 
 	files_root: PATH
 			-- Uploaded files will be stored in `files_root' folder
+		local
+			tmp: PATH
 		once
-			Result := document_root.extended ("files")
+			tmp := document_root.extended ("files")
+			Result := tmp.extended ("uploaded_files")
 		end
 
 feature -- Handler
@@ -139,7 +140,89 @@ feature -- Handler
 			res.redirect_now_with_content (req.script_url ("/"), uri + ": not found. %N Redirectioin to" + req.script_url ("/"), "text/html")
 		end
 
-	execute_upload_handler(req: WSF_REQUEST; res: WSF_RESPONSE; a_api: CMS_API)
+	execute_upload (req: WSF_REQUEST; res: WSF_RESPONSE)
+		local
+			body: STRING_8
+			answer: STRING_8
+			file_name: STRING_8
+			file_path: PATH
+			page: WSF_HTML_PAGE_RESPONSE
+			tmp: BOOLEAN
+		do
+			if req.is_request_method ("GET") or else not req.has_uploaded_file then
+				-- create page
+				create page.make
+				page.set_title ("EWF: Upload file")
+				page.add_style (req.script_url ("style.css"), "all")
+				-- page.set_status_code ({HTTP_STATUS_CODE}.ok)
+
+				-- create body
+				create body.make_empty
+				body.append ("<h1> EWF: Upload files </h1>%N")
+				body.append ("<form action=%"" + req.script_url ("/upload") + "%" enctype=%"multipart/form-data%" method=%"POST%" %N")
+				body.append ("<fieldset> <legend>Upload files</legend> %N")
+				body.append ("<div><label>File %N")
+				body.append ("<input name=%"file-name[]%" type=%"file%" multiple %N")
+				body.append ("</label></div> %N")
+				body.append ("<fieldset><div><button type=sbmit>Upload</button></div></fieldset> %N")
+				body.append ("</form>%N")
+
+				-- connect the body with the page
+				page.set_body (body)
+
+				-- set response
+				-- res.put_header ({HTTP_STATUS_CODE}.ok, <<["Content-type", "text/html"], ["Content-length", body.count.out]>>)
+				res.send (page)
+			else
+				-- create page
+				create page.make
+				page.set_title ("Uploaded files")
+				page.add_style (req.script_url ("style.css"), "all")
+
+				-- create answer
+				create answer.make_empty
+				answer.append ("<h1>Uploaded Files</h1> %N")
+				answer.append ("<table> %N")
+				answer.append ("<tr><th>Filename</th><th>Type</th><th>Size</th></tr>")
+				across
+					req.uploaded_files as uf
+				loop
+					file_name := uf.item.safe_filename
+
+					-- add file to table
+					answer.append ("<tr>")
+					answer.append ("<td> %N")
+					answer.append ("<a href=%"../files/uploaded_files/" + file_name + "%">" + uf.item.filename + "</a> ")
+					answer.append ("</td>")
+					answer.append ("<td>")
+					answer.append (uf.item.content_type)
+					answer.append ("</td>%N")
+					answer.append ("<td>")
+					answer.append (uf.item.size.out + " Bytes")
+					answer.append ("</td>%N")
+					answer.append ("</tr>")
+
+					-- check if file is already in folder
+					if not files_root.has_extension (file_name) then
+						file_path := files_root.extended (file_name)
+
+						-- move file to path
+						tmp := uf.item.move_to(file_path.name)
+					end
+
+				end
+				answer.append ("</table>%N")
+
+				-- connect the body with the page
+				page.set_body (answer)
+
+				-- set response
+				-- res.put_header ({HTTP_STATUS_CODE}.ok, <<["Content-type", "text/html"], ["Content-length", answer.count.out]>>)
+				res.send (page)
+			end
+		end
+
+		execute_upload_handler(req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			body: STRING_8
 			safe_filename: STRING_8
@@ -148,13 +231,13 @@ feature -- Handler
 			n: INTEGER
 		do
 			if req.is_request_method ("GET") or else not req.has_uploaded_file then
+				-- create page
 				create page.make
 				page.set_title ("EWF: Upload file")
 				page.add_style (req.script_url ("style.css"), "all")
-				create body.make_empty
-				page.set_body (body)
 
 				-- create the body
+				create body.make_empty
 				body.append ("<h1> EWF: Upload files </h1>%N")
 				body.append ("<form action=%"" + req.script_url ("/upload") + "%" method=%"POST%" enctype=%"multipart/form-data%">%N")
 
@@ -176,7 +259,7 @@ feature -- Handler
 
 				-- set the submit button
 				body.append ("<button type=%"submit%">UPLOAD</button>%N")
-
+				res.put_header ({HTTP_STATUS_CODE}.ok, <<["Content-type", "text/html"], ["Content-length", body.count.out]>>)
 				res.send (page)
 			else
 				create body.make_empty
@@ -204,6 +287,7 @@ feature -- Handler
 				create page.make
 				page.add_style ("../style.css", "all")
 				page.set_body (body)
+				res.put_header ({HTTP_STATUS_CODE}.ok, <<["Content-type", "text/html"], ["Content-length", body.count.out]>>)
 				res.send (page)
 			end
 		end
