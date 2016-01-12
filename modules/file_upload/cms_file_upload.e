@@ -164,7 +164,7 @@ feature -- Handler
 				body.append ("<div><label>File %N")
 				body.append ("<input name=%"file-name[]%" type=%"file%" multiple %N")
 				body.append ("</label></div> %N")
-				body.append ("<fieldset><div><button type=sbmit>Upload</button></div></fieldset> %N")
+				body.append ("<div><button type=submit>Upload</button></div></fieldset> %N")
 				body.append ("</form>%N")
 
 				-- connect the body with the page
