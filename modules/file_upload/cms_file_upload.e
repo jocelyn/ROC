@@ -81,7 +81,7 @@ feature -- Access: router
 			www: WSF_FILE_SYSTEM_HANDLER
 		do
 
-			map_uri_template_agent (a_router, "/upload{?nb}", agent execute_upload, void)
+			map_uri_template_agent (a_router, "/upload/", agent execute_upload, void)
 
 			create www.make_with_path (document_root)
 			www.set_directory_index (<<"index.html">>)
@@ -99,17 +99,25 @@ feature -- Hooks
 
 	block_list: ITERABLE [like {CMS_BLOCK}.name]
 		do
-			Result := <<"Uploader info TODO">>
+			Result := <<"?uploader">>
 		end
 
 	get_block_view (a_block_id: READABLE_STRING_8; a_response: CMS_RESPONSE)
+		local
+			menu: CMS_MENU
+			menu_block: CMS_MENU_BLOCK
+			menu_entries_count: INTEGER
 		do
-
+			if a_block_id.same_string ("uploader") then
+				-- create menu_block.make ({CMS_MENU_SYSTEM}.primary_menu)
+				-- a_response.add_block (menu_block, "page_top")
+			end
 		end
 
 	menu_system_alter (a_menu_system: CMS_MENU_SYSTEM; a_response: CMS_RESPONSE)
 		local
 			link: CMS_LOCAL_LINK
+			second_link: CMS_LOCAL_LINK
 		do
 			create link.make ("Upload", "upload/")
 			a_menu_system.primary_menu.extend (link)
@@ -143,180 +151,60 @@ feature -- Handler
 	execute_upload (req: WSF_REQUEST; res: WSF_RESPONSE)
 		local
 			body: STRING_8
-			answer: STRING_8
-			file_name: STRING_8
-			file_path: PATH
-			page: WSF_HTML_PAGE_RESPONSE
-			tmp: BOOLEAN
 		do
-			if req.is_request_method ("GET") or else not req.has_uploaded_file then
-				-- create page
-				create page.make
-				page.set_title ("EWF: Upload file")
-				page.add_style (req.script_url ("style.css"), "all")
-				-- page.set_status_code ({HTTP_STATUS_CODE}.ok)
+			-- create body
+			create body.make_empty
+			body.append ("<h1> EWF: Upload files </h1>%N")
+			body.append ("<p>Please choose some file(s) to upload.</p>")
 
-				-- create body
-				create body.make_empty
-				body.append ("<h1> EWF: Upload files </h1>%N")
-				body.append ("<form action=%"" + req.script_url ("/upload") + "%" enctype=%"multipart/form-data%" method=%"POST%" %N")
-				body.append ("<fieldset> <legend>Upload files</legend> %N")
-				body.append ("<div><label>File %N")
-				body.append ("<input name=%"file-name[]%" type=%"file%" multiple %N")
-				body.append ("</label></div> %N")
-				body.append ("<div><button type=submit>Upload</button></div></fieldset> %N")
-				body.append ("</form>%N")
+			-- create form to choose files and upload them
+			body.append ("<form action=%"" + req.script_url ("/upload/") + "%" enctype=%"multipart/form-data%" method=%"POST%"> %N")
+			body.append ("<input name=%"file-name[]%" type=%"file%" multiple> %N")
+			body.append ("<button type=submit>Upload</button>%N")
+			body.append ("</form>%N")
 
-				-- connect the body with the page
-				page.set_body (body)
+			-- put the body to the response
+			res.put_string (body)
 
-				-- set response
-				-- res.put_header ({HTTP_STATUS_CODE}.ok, <<["Content-type", "text/html"], ["Content-length", body.count.out]>>)
-				res.send (page)
-			else
-				-- create page
-				create page.make
-				page.set_title ("Uploaded files")
-				page.add_style (req.script_url ("style.css"), "all")
+			show_and_store_files (req, res)
 
-				-- create answer
-				create answer.make_empty
-				answer.append ("<h1>Uploaded Files</h1> %N")
-				answer.append ("<table> %N")
-				answer.append ("<tr><th>Filename</th><th>Type</th><th>Size</th></tr>")
+		end
+
+	show_and_store_files (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- show all uploaded files
+		local
+			file_path: PATH
+			file_name: STRING_8
+			stored: BOOLEAN
+			file_system_handler: WSF_FILE_SYSTEM_HANDLER
+
+		do
+			-- if has uploaded files, then store them
+			if req.has_uploaded_file then
 				across
 					req.uploaded_files as uf
 				loop
 					file_name := uf.item.safe_filename
-
-					-- add file to table
-					answer.append ("<tr>")
-					answer.append ("<td> %N")
-					answer.append ("<a href=%"../files/uploaded_files/" + file_name + "%">" + uf.item.filename + "</a> ")
-					answer.append ("</td>")
-					answer.append ("<td>")
-					answer.append (uf.item.content_type)
-					answer.append ("</td>%N")
-					answer.append ("<td>")
-					answer.append (uf.item.size.out + " Bytes")
-					answer.append ("</td>%N")
-					answer.append ("</tr>")
 
 					-- check if file is already in folder
 					if not files_root.has_extension (file_name) then
 						file_path := files_root.extended (file_name)
 
 						-- move file to path
-						tmp := uf.item.move_to(file_path.name)
+						stored := uf.item.move_to(file_path.name)
 					end
-
 				end
-				answer.append ("</table>%N")
-
-				-- connect the body with the page
-				page.set_body (answer)
-
-				-- set response
-				-- res.put_header ({HTTP_STATUS_CODE}.ok, <<["Content-type", "text/html"], ["Content-length", answer.count.out]>>)
-				res.send (page)
 			end
+
+			-- create file_system_handler and show the uploaded files
+			create file_system_handler.make_with_path (document_root)
+			file_system_handler.enable_index
+			file_system_handler.process_index ("/uploaded_files", files_root, req, res)
+
 		end
+		
 
-		execute_upload_handler(req: WSF_REQUEST; res: WSF_RESPONSE)
-		local
-			body: STRING_8
-			safe_filename: STRING_8
-			path: PATH
-			page: WSF_HTML_PAGE_RESPONSE
-			n: INTEGER
-		do
-			if req.is_request_method ("GET") or else not req.has_uploaded_file then
-				-- create page
-				create page.make
-				page.set_title ("EWF: Upload file")
-				page.add_style (req.script_url ("style.css"), "all")
-
-				-- create the body
-				create body.make_empty
-				body.append ("<h1> EWF: Upload files </h1>%N")
-				body.append ("<form action=%"" + req.script_url ("/upload") + "%" method=%"POST%" enctype=%"multipart/form-data%">%N")
-
-				-- tetermine how many files to upload by a query parameter ?nb=number_of_files
-				if attached {WSF_STRING} req.query_parameter ("nb") as p_nb and then p_nb.is_integer then
-					n := p_nb.integer_value
-				else
-					n := 1
-				end
-
-				-- llist for the number of wanted files a upload button
-				from
-				until
-					n = 0
-				loop
-					body.append ("<input type=%"file%" name=%"uploaded_file[]%" size=%"60%"></br> %N")
-					n := n-1
-				end
-
-				-- set the submit button
-				body.append ("<button type=%"submit%">UPLOAD</button>%N")
-				res.put_header ({HTTP_STATUS_CODE}.ok, <<["Content-type", "text/html"], ["Content-length", body.count.out]>>)
-				res.send (page)
-			else
-				create body.make_empty
-				body.append ("<h1>EWF: Uploaded files</h1>%N")
-				body.append ("<ul>%N")
-
-				n := 0
-
-				across
-					req.uploaded_files as u_file
-				loop
-					body.append ("<li>%N")
-					body.append ("<div>" + u_file.item.name + "=" + html_encode (u_file.item.filename) + " size=" + u_file.item.size.out + " type" + u_file.item.content_type + "</div> %N")
-					safe_filename := u_file.item.safe_filename
-					path := files_root.extended (safe_filename)
-
-					-- TODO: list dhe uploaded items
-
-					body.append ("</li> %N")
-				end
-
-				body.append ("</ul> %N")
-
-				-- create page
-				create page.make
-				page.add_style ("../style.css", "all")
-				page.set_body (body)
-				res.put_header ({HTTP_STATUS_CODE}.ok, <<["Content-type", "text/html"], ["Content-length", body.count.out]>>)
-				res.send (page)
-			end
-		end
-
-feature {NONE} -- Encoder
-
-	url_encode (s: READABLE_STRING_32): STRING_8
-		-- URL Encode `s' as Result
-	do
-		Result := url_encoder.encoded_string (s)
-	end
-
-	url_encoder: URL_ENCODER
-		once
-			create Result
-		end
-
-	html_encode (s: READABLE_STRING_32): STRING_8
-			-- HTML Encode `s' as Result	
-		do
-			Result := html_encoder.encoded_string (s)
-		end
-
-	html_encoder: HTML_ENCODER
-		once
-			create Result
-		end
-
-feature -- Mapping helper: uri template agent
+feature -- Mapping helper: uri template agent (analogue to the demo-module)
 
 	map_uri_template (a_router: WSF_ROUTER; a_tpl: STRING; h: WSF_URI_TEMPLATE_HANDLER; rqst_methods: detachable WSF_REQUEST_METHODS)
 			-- Map `h' as handler for `a_tpl', according to `rqst_methods'.
