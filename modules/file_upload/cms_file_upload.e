@@ -11,7 +11,8 @@ inherit
 		redefine
 			install,
 			initialize,
-			setup_hooks
+			setup_hooks,
+			permissions
 		end
 
 	CMS_HOOK_BLOCK
@@ -36,6 +37,23 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	name: STRING
+
+	permissions: LIST [READABLE_STRING_8]
+			-- List of permission ids, used by this module, and declared.
+		do
+			Result := Precursor
+			Result.force ("manage admin")
+			Result.force ("admin users")
+			Result.force ("admin roles")
+			Result.force ("admin modules")
+			Result.force ("install modules")
+			Result.force ("admin core caches")
+			Result.force ("clear blocks cache")
+			Result.force ("admin export")
+			Result.force ("export core")
+
+			Result.force ("upload files")
+		end
 
 feature {CMS_API} -- Module Initialization
 
@@ -119,8 +137,11 @@ feature -- Hooks
 			link: CMS_LOCAL_LINK
 			second_link: CMS_LOCAL_LINK
 		do
-			create link.make ("Upload", "upload/")
-			a_menu_system.primary_menu.extend (link)
+			-- login in demo did somehow not work
+			-- if a_response.has_permission ("upload files") then
+				create link.make ("Upload", "upload/")
+				a_menu_system.primary_menu.extend (link)
+			-- end
 		end
 
 feature -- Configuration		
@@ -177,7 +198,8 @@ feature -- Handler
 			file_name: STRING_8
 			stored: BOOLEAN
 			file_system_handler: WSF_FILE_SYSTEM_HANDLER
-
+			file_system_upload_handler: CMS_FILE_UPLOAD_FILE_SYSTEM_HANDLER
+			uploaded_file: CMS_FILE_UPLOAD_FILE
 		do
 			-- if has uploaded files, then store them
 			if req.has_uploaded_file then
@@ -202,7 +224,7 @@ feature -- Handler
 			file_system_handler.process_index ("/uploaded_files", files_root, req, res)
 
 		end
-		
+
 
 feature -- Mapping helper: uri template agent (analogue to the demo-module)
 
