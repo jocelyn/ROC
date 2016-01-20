@@ -162,6 +162,7 @@ feature -- Handler
 		end
 
 	display_uploaded_file_info (req: WSF_REQUEST; res: WSF_RESPONSE; api: CMS_API)
+			-- Display information related to a cms uploaded file.
 		local
 			body: STRING_8
 			r: CMS_RESPONSE
@@ -179,7 +180,7 @@ feature -- Handler
 				if attached file_upload_api as l_file_upload_api then
 					f := l_file_upload_api.new_uploads_file (create {PATH}.make_from_string (fn))
 
-						-- FIXME: get CMS information related to this file ...
+						-- FIXME: get CMS information related to this file ... owner, ...
 
 					body.append ("<p>Open the media <a href=%"" + req.script_url ("/" + l_file_upload_api.file_link (f).location) + "%">")
 					body.append (api.html_encoded (f.filename))
@@ -260,7 +261,13 @@ feature -- Handler
 						create l_uploaded_file.make_with_uploaded_file (l_file_upload_api.uploads_location, uf)
 						a_output.append ("<li>")
 						a_output.append (api.html_encoded (l_uploaded_file.filename))
+
+							-- Record current user, ..
+							-- for now, only user, but it should also take care of uploaded time, ...
+						l_uploaded_file.set_owner (api.current_user (req))
+
 						l_file_upload_api.save_uploaded_file (l_uploaded_file)
+
 							-- FIXME: display for information, about the new disk filename.
 						if l_file_upload_api.error_handler.has_error then
 							a_output.append (" <span class=%"error%">failed!</span>")
