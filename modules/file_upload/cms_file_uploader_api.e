@@ -58,6 +58,7 @@ feature -- Storage
 			ut: FILE_UTILITIES
 			stored: BOOLEAN
 		do
+			reset_error
 			p := f.location
 			if p.is_absolute then
 			else
