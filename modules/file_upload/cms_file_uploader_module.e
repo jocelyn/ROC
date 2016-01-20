@@ -207,23 +207,29 @@ feature -- Handler
 			r: CMS_RESPONSE
 		do
 			if req.is_get_head_request_method or req.is_post_request_method then
-				-- create body
 				create body.make_empty
 				body.append ("<h1> Upload files </h1>%N")
-				body.append ("<p>Please choose some file(s) to upload.</p>")
 
-				-- create form to choose files and upload them
-				body.append ("<form action=%"" + req.script_url ("/upload/") + "%" enctype=%"multipart/form-data%" method=%"POST%"> %N")
-				body.append ("<input name=%"file-name[]%" type=%"file%" multiple> %N")
-				body.append ("<button type=submit>Upload</button>%N")
-				body.append ("</form>%N")
+				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+				if r.has_permission ("upload files") then
+						-- create body
+					body.append ("<p>Please choose some file(s) to upload.</p>")
 
-				if req.is_post_request_method then
-					process_uploaded_files (req, api, body)
+						-- create form to choose files and upload them
+					body.append ("<form action=%"" + req.script_url ("/upload/") + "%" enctype=%"multipart/form-data%" method=%"POST%"> %N")
+					body.append ("<input name=%"file-name[]%" type=%"file%" multiple> %N")
+					body.append ("<button type=submit>Upload</button>%N")
+					body.append ("</form>%N")
+
+					if req.is_post_request_method then
+						process_uploaded_files (req, api, body)
+					end
+				else
+					create {FORBIDDEN_ERROR_CMS_RESPONSE} r.make (req, res, api)
 				end
 
 					-- Build the response.
-				create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
+
 				append_uploaded_file_album_to (req, api, body)
 				r.set_main_content (body)
 			else
