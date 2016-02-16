@@ -1,0 +1,61 @@
+.uploaded-files {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+.uploaded-files th {
+  padding-left: 5px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.uploaded-files td {
+  padding-left: 5px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.uploaded-files a.button {
+  color: black;
+  text-decoration: none;
+  border: solid 1px #999;
+  background-color: #ddd;
+}
+.uploaded-files a.button:hover {
+  color: black;
+  text-decoration: none;
+}
+
+.upload-files a.upload-button {
+  margin: auto;
+  width: 100px;
+  color: black;
+  text-decoration: none;
+}
+.upload-files a.upload-button:hover {
+  color: black;
+  text-decoration: none;
+}
+
+/******************* Drop Zone *******************/
+.dropzone {
+  width: 100%;
+  border: 2px dashed blue;
+  border-radius: 3px;
+  text-align: center;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+.dropzone .dz-message {
+  cursor: pointer;
+}
+.dropzone .dz-preview, .dropzone .dz-file-preview, .dropzone .dz-processing, .dropzone .dz-success,
+.dropzone .dz-image-preview, .dropzone .dz-complete {
+  padding: 10px;
+  margin: 10px;
+  width: auto;
+  display: inline-block;
+}
+.dropzone .dz-preview {
+  border: 1px solid black;
+  border-radius: 5px;
+  background: #e6e6e6;
+}
