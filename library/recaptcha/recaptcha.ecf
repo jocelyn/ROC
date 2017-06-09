@@ -3,10 +3,10 @@
 	<target name="recaptcha">
 		<root all_classes="true"/>
 		<file_rule>
-			<exclude>/.git$</exclude>
-			<exclude>/.svn$</exclude>
-			<exclude>/CVS$</exclude>
+			<exclude>/\.git$</exclude>
 			<exclude>/EIFGENs$</exclude>
+			<exclude>/CVS$</exclude>
+			<exclude>/\.svn$</exclude>
 		</file_rule>
 		<option warning="true">
 		</option>
@@ -14,5 +14,7 @@
 		<library name="http_client_extension" location="..\http_client_extension\http_client_extension.ecf"/>
 		<library name="json" location="$ISE_LIBRARY\contrib\library\text\parser\json\library\json.ecf" readonly="false"/>
 		<cluster name="recaptcha" location=".\src\" recursive="true"/>
+		<library name="uri" location="$ISE_LIBRARY\library\text\uri\uri.ecf"/>
+		</cluster>
 	</target>
 </system>
