@@ -110,7 +110,7 @@ feature -- Hook: form_alter
 			-- Add `h' as subscriber of form alter hooks CMS_HOOK_FORM_ALTER,
 			-- and response `a_response'.
 		do
-			subscribe_to_hook (h, {CMS_HOOK_MENU_ALTER})
+			subscribe_to_hook (h, {CMS_HOOK_FORM_ALTER})
 		end
 
 	invoke_form_alter (a_form: CMS_FORM; a_form_data: detachable WSF_FORM_DATA; a_response: CMS_RESPONSE)

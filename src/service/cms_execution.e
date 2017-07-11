@@ -147,6 +147,35 @@ feature -- Settings: router
 			configure_api_file_handler (l_router)
 		end
 
+	setup_router_for_webapi
+		local
+			l_api: like api
+			l_router: like router
+			l_module: CMS_MODULE
+		do
+			l_api := api
+			l_router := router
+
+			l_api.logger.put_debug (generator + ".setup_router_for_webapi", Void)
+
+				-- Configure root of api handler.
+			l_router.set_base_url (l_api.webapi_path (Void))
+
+				-- Include routes from modules.
+			across
+				modules as ic
+			loop
+				l_module := ic.item
+				if
+					l_module.is_initialized and then
+					attached {CMS_WITH_WEBAPI} l_module as l_webapi and then
+					attached l_webapi.module_webapi as wapi
+				then
+					wapi.setup_router (l_router, l_api)
+				end
+			end
+		end
+
 	setup_router_for_administration
 			-- <Precursor>
 		local
@@ -168,11 +197,19 @@ feature -- Settings: router
 			loop
 				l_module := ic.item
 				if
-					l_module.is_initialized and then
-					attached {CMS_ADMINISTRABLE} l_module as l_administration and then
-					attached l_administration.module_administration as adm
+					l_module.is_initialized
 				then
-					adm.setup_router (l_router, l_api)
+					if
+						attached {CMS_ADMINISTRABLE} l_module as l_administration and then
+						attached l_administration.module_administration as adm
+					then
+						adm.setup_router (l_router, l_api)
+					elseif
+						attached {CMS_WITH_WEBAPI} l_module as l_wapi and then
+						attached l_wapi.module_webapi as wapi
+					then
+						wapi.setup_router (l_router, l_api)
+					end
 				end
 			end
 			map_uri ("/install", create {CMS_ADMIN_INSTALL_HANDLER}.make (api), l_router.methods_head_get)
@@ -234,6 +271,8 @@ feature -- Request execution
 			request.set_uploaded_file_path (api.temp_location)
 			if api.is_administration_request (request) then
 				initialize_administration_execution
+			elseif api.is_webapi_request (request) then
+				initialize_webapi_execution
 			else
 				initialize_site_execution
 			end
@@ -245,6 +284,14 @@ feature -- Request execution
 			api.switch_to_site_mode
 			api.initialize_execution
 			setup_router
+		end
+
+	initialize_webapi_execution
+			-- Initialize for site execution.
+		do
+			api.switch_to_webapi_mode
+			api.initialize_execution
+			setup_router_for_webapi
 		end
 
 	initialize_administration_execution

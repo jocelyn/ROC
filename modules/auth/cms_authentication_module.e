@@ -124,8 +124,6 @@ feature -- Router
 			a_router.handle ("/account/new-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_new_password(a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/reset-password", create {WSF_URI_AGENT_HANDLER}.make (agent handle_reset_password(a_api, ?, ?)), a_router.methods_get_post)
 			a_router.handle ("/account/change/{field}", create {WSF_URI_TEMPLATE_AGENT_HANDLER}.make (agent handle_change_field (a_api, ?, ?)), a_router.methods_get_post)
-
-			a_router.handle ("/user/{uid}", create {CMS_USER_HANDLER}.make (a_api), a_router.methods_get)
 		end
 
 feature -- Hooks configuration
@@ -214,16 +212,43 @@ feature -- Handler
 			l_user: detachable CMS_USER
 			b: STRING
 			lnk: CMS_LOCAL_LINK
+			f: CMS_FORM
+			tf: WSF_FORM_TEXT_INPUT
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			create b.make_empty
 			l_user := r.user
+			create f.make (r.location, "roccms-user-view")
 			if attached smarty_template_block (Current, "account_info", api) as l_tpl_block then
 				l_tpl_block.set_weight (-10)
 				r.add_block (l_tpl_block, "content")
 			else
 				debug ("cms")
 					r.add_warning_message ("Error with block [resources_page]")
+				end
+				if l_user /= Void then
+					create tf.make_with_text ("username", l_user.name)
+					tf.set_label ("Username")
+					f.extend (tf)
+					if attached l_user.email as l_email then
+						create tf.make_with_text ("email", l_email.to_string_32)
+						tf.set_label ("Email")
+						f.extend (tf)
+					end
+					if attached l_user.profile_name as l_prof_name then
+						create tf.make_with_text ("profile_name", l_prof_name)
+						tf.set_label ("Profile name")
+						f.extend (tf)
+					end
+					create tf.make_with_text ("creation", api.formatted_date_time_yyyy_mm_dd (l_user.creation_date))
+					tf.set_label ("Creation date")
+					f.extend (tf)
+
+					if attached l_user.last_login_date as dt then
+						create tf.make_with_text ("last_login", api.formatted_date_time_ago (dt))
+						tf.set_label ("Last login")
+						f.extend (tf)
+					end
 				end
 			end
 
@@ -236,6 +261,9 @@ feature -- Handler
 				lnk.set_weight (2)
 				r.add_to_primary_tabs (lnk)
 			end
+
+			api.hooks.invoke_form_alter (f, Void, r)
+			f.append_to_html (r.wsf_theme, b)
 
 			r.set_main_content (b)
 
@@ -251,10 +279,12 @@ feature -- Handler
 			l_user: detachable CMS_USER
 			b: STRING
 			lnk: CMS_LOCAL_LINK
+			l_form: CMS_FORM
 		do
 			create {GENERIC_VIEW_CMS_RESPONSE} r.make (req, res, api)
 			create b.make_empty
 			l_user := r.user
+			create l_form.make (r.location, "roccms-user-edit")
 			if attached smarty_template_block (Current, "account_edit", api) as l_tpl_block then
 				l_tpl_block.set_weight (-10)
 				r.add_block (l_tpl_block, "content")
@@ -262,6 +292,7 @@ feature -- Handler
 				debug ("cms")
 					r.add_warning_message ("Error with block [resources_page]")
 				end
+				-- Build CMS form...
 			end
 			create lnk.make ("View", "account/")
 			lnk.set_weight (1)
@@ -286,6 +317,8 @@ feature -- Handler
 			if attached new_change_email_form (r) as f then
 				f.append_to_html (r.wsf_theme, b)
 			end
+
+			l_form.append_to_html (r.wsf_theme, b)
 
 			r.set_main_content (b)
 

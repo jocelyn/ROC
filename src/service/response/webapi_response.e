@@ -1,13 +1,15 @@
 note
-	description: "Interface providing administration module."
+	description: "[
+			Generic Web API Response.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
 deferred class
-	CMS_ADMINISTRABLE
+	WEBAPI_RESPONSE
 
 inherit
-	CMS_WITH_MODULE_ADMINISTRATION
+	CMS_RESPONSE_I
 
 note
 	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
