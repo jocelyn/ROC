@@ -401,36 +401,32 @@ feature -- Filters
 --			f.set_next (l_filter)
 --			l_filter := f
 
---				-- Include filters from modules
---			across
---				modules as ic
---			loop
---				l_module := ic.item
---				if
---					l_module.is_enabled and then
---					attached l_module.filters (l_api) as l_m_filters
---				then
---					across l_m_filters as f_ic loop
---						f := f_ic.item
---						l_filter.append (f)
-----						f.set_next (l_filter)
-----						l_filter := f
---					end
---				end
---			end
-
 			filter := l_filter
 		end
 
 	setup_filter
 			-- Setup `filter'.
 		local
-			f, l_filter: detachable WSF_FILTER
+			f, l_filter, l_last_filter: detachable WSF_FILTER
 			l_module: CMS_MODULE
 			l_api: like api
 		do
 			l_api := api
-			l_filter := filter
+
+				-- Find insertion location for new filter
+				-- i.e just before the CMS_EXECUTION filter.
+			from
+				l_filter := filter
+			until
+				l_last_filter /= Void or not attached l_filter.next as l_next_filter
+			loop
+				if l_next_filter.next = Void then
+					l_last_filter := l_next_filter
+				else
+					l_filter := l_next_filter
+				end
+			end
+
 				-- Include filters from modules
 			across
 				modules as ic
@@ -442,7 +438,9 @@ feature -- Filters
 				then
 					across l_m_filters as f_ic loop
 						f := f_ic.item
-						l_filter.append (f)
+						l_filter.set_next (f)
+						f.set_next (l_last_filter)
+
 --						f.set_next (l_filter)
 --						l_filter := f
 					end
