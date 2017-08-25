@@ -10,6 +10,9 @@ deferred class
 
 inherit
 	WSF_FILTER
+		rename
+			execute as auth_execute
+		end
 
 feature {NONE} -- Initialization
 
@@ -25,8 +28,22 @@ feature -- API Service
 
 feature -- Basic operations
 
+	auth_execute (req: WSF_REQUEST; res: WSF_RESPONSE)
+			-- <Precursor>
+		do
+				-- If user is already authenticated, do not try current authenticating filter
+				-- and go to next filter directly.
+			if api.user_is_authenticated then
+				execute_next (req, res)
+			else
+				execute (req, res)
+			end
+		end
+
 	execute (req: WSF_REQUEST; res: WSF_RESPONSE)
 			-- <Precursor>
+		require
+			no_user_authenticated: api.user = Void
 		deferred
 		end
 
