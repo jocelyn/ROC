@@ -384,7 +384,6 @@ feature -- Filters
 			-- Create `filter'.
 		local
 			f, l_filter: detachable WSF_FILTER
-			l_module: CMS_MODULE
 			l_api: like api
 		do
 			l_api := api
