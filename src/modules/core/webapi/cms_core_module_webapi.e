@@ -46,8 +46,9 @@ feature -- Access: filter
 	filters (a_api: CMS_API): detachable LIST [WSF_FILTER]
 			-- Possibly list of Filter's module.
 		do
-			create {ARRAYED_LIST [WSF_FILTER]} Result.make (1)
+			create {ARRAYED_LIST [WSF_FILTER]} Result.make (2)
 			Result.extend (create {CMS_CORE_ACCESS_TOKEN_WEBAPI_AUTH_FILTER}.make (a_api))
+			Result.extend (create {CMS_CORE_BASIC_WEBAPI_AUTH_FILTER}.make (a_api))
 		end
 
 --feature -- Helpers

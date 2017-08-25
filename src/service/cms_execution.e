@@ -202,6 +202,7 @@ feature -- Settings: router
 							f := f_ic.item
 							l_filter.set_next (f)
 							f.set_next (l_last_filter)
+							l_filter := f
 						end
 					end
 				end
@@ -261,6 +262,7 @@ feature -- Settings: router
 								f := f_ic.item
 								l_filter.set_next (f)
 								f.set_next (l_last_filter)
+								l_filter := f
 							end
 						end
 --					elseif
@@ -439,13 +441,12 @@ feature -- Filters
 						f := f_ic.item
 						l_filter.set_next (f)
 						f.set_next (l_last_filter)
-
 --						f.set_next (l_filter)
---						l_filter := f
+						l_filter := f
 					end
 				end
 			end
-			filter := l_filter
+--			filter := l_filter
 		end
 
 feature -- Execution
