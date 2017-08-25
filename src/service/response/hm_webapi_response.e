@@ -15,11 +15,27 @@ feature -- Element change
 		deferred
 		end
 
-	add_field (a_name: READABLE_STRING_GENERAL; a_value: READABLE_STRING_GENERAL)
+	add_string_field (a_name: READABLE_STRING_GENERAL; a_value: READABLE_STRING_GENERAL)
 		deferred
 		end
 
-	add_link (rel: READABLE_STRING_8; a_attname: READABLE_STRING_8 ; a_att_href: READABLE_STRING_8)
+	add_boolean_field (a_name: READABLE_STRING_GENERAL; a_value: BOOLEAN)
+		deferred
+		end
+
+	add_integer_64_field (a_name: READABLE_STRING_GENERAL; a_value: INTEGER_64)
+		deferred
+		end
+
+	add_iterator_field (a_name: READABLE_STRING_GENERAL; a_value: ITERABLE [detachable ANY])
+		deferred
+		end
+
+	add_table_iterator_field (a_name: READABLE_STRING_GENERAL; a_value: TABLE_ITERABLE [detachable ANY, READABLE_STRING_GENERAL])
+		deferred
+		end
+
+	add_link (rel: READABLE_STRING_8; a_attname: READABLE_STRING_8; a_att_href: READABLE_STRING_8)
 		deferred
 		end
 

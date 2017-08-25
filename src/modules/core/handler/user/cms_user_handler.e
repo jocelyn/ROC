@@ -82,7 +82,6 @@ feature -- HTTP Methods
 			-- <Precursor>
 		local
 			l_user: detachable CMS_USER
-			l_uid: INTEGER_64
 		do
 			if api.has_permission ("view user") then
 					-- Display existing node

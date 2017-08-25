@@ -66,13 +66,63 @@ feature -- Access
 			sql_finalize
 		end
 
+	users_with_profile_item (a_item_name: READABLE_STRING_GENERAL; a_value: detachable READABLE_STRING_GENERAL): detachable LIST [CMS_USER]
+			-- Users having a profile item `a_item_name:a_value`.
+			-- Note: if `a_value` is Void, return users having a profile item named `a_item_name`.
+		local
+			l_parameters: STRING_TABLE [detachable ANY]
+			l_uids: ARRAYED_LIST [INTEGER_64]
+		do
+			reset_error
+			create l_parameters.make (2)
+			l_parameters.put (a_item_name, "key")
+			if a_value = Void then
+				sql_query (sql_select_users_with_profile_item_named, l_parameters)
+			else
+				l_parameters.put (a_value, "value")
+				sql_query (sql_select_users_with_profile_item, l_parameters)
+			end
+			if not has_error then
+				create l_uids.make (0)
+				from
+					sql_start
+				until
+					sql_after or has_error
+				loop
+					if
+						attached sql_read_integer_64 (1) as l_uid and then
+						l_uid > 0
+					then
+						l_uids.force (l_uid)
+					end
+					sql_forth
+				end
+			end
+			sql_finalize
+			if
+				not has_error and
+				l_uids /= Void and
+				attached api as l_cms_api
+			then
+				create {ARRAYED_LIST [CMS_USER]} Result.make (l_uids.count)
+				across
+					l_uids as ic
+				loop
+					if attached l_cms_api.user_api.user_by_id (ic.item) as u then
+						Result.force (u)
+					else
+						check known_user: False end
+					end
+				end
+			end
+		end
+
 feature -- Change
 
 	save_user_profile_item (a_user: CMS_USER; a_item_name: READABLE_STRING_GENERAL; a_item_value: READABLE_STRING_GENERAL)
 			-- Save user profile item `a_item_name:a_item_value` for `a_user'.
 		local
 			l_parameters: STRING_TABLE [detachable ANY]
-			p: detachable CMS_USER_PROFILE
 		do
 			create l_parameters.make (3)
 			l_parameters.put (a_user.id, "uid")
@@ -142,6 +192,12 @@ feature {NONE} -- Queries
 	sql_select_user_profile_item: STRING = "SELECT key, value FROM user_profiles WHERE uid=:uid AND key=:key"
 			-- user profile items for :uid;
 
+	sql_select_users_with_profile_item: STRING = "SELECT uid FROM user_profiles WHERE key=:key and value=:value"
+			-- users with profile item named :key and value :value;
+
+	sql_select_users_with_profile_item_named: STRING = "SELECT uid FROM user_profiles WHERE key=:key"
+			-- users with profile item named :key;
+
 	sql_insert_user_profile_item: STRING = "INSERT INTO user_profiles (uid, key, value) VALUES (:uid, :key, :value);"
 			-- new user profile item for :uid;
 
@@ -149,5 +205,8 @@ feature {NONE} -- Queries
 			-- user profile items for :uid;
 
 
+note
+	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end
 

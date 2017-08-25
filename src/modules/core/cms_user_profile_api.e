@@ -54,6 +54,15 @@ feature -- Access: profile
 			Result := user_profile_storage.user_profile_item (a_user, a_item_name)
 		end
 
+	users_with_profile_item (a_item_name: READABLE_STRING_GENERAL; a_value: detachable READABLE_STRING_GENERAL): detachable LIST [CMS_USER]
+			-- Users having a profile item `a_item_name:a_value`.
+			-- Note: if `a_value` is Void, return users having a profile item named `a_item_name`.
+		require
+			not a_item_name.is_whitespace
+		do
+			Result := user_profile_storage.users_with_profile_item (a_item_name, a_value)
+		end
+
 feature -- Change: profile
 
 	save_user_profile (a_user: CMS_USER; a_user_profile: CMS_USER_PROFILE)

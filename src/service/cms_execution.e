@@ -19,6 +19,7 @@ inherit
 			execute_default,
 			filter_execute,
 			initialize,
+			initialize_filter,
 			initialize_router
 		end
 
@@ -59,6 +60,13 @@ feature {NONE} -- Initialization
 				-- CMS Initialization
 				-- for void-safety concern.
 			create {WSF_MAINTENANCE_FILTER} filter
+		end
+
+	initialize_filter
+			-- Initialize `filter`.
+		do
+			create_filter
+			-- setup_filter: delayed to `initialize_execution`.
 		end
 
 	initialize_router
@@ -147,11 +155,12 @@ feature -- Settings: router
 			configure_api_file_handler (l_router)
 		end
 
-	setup_router_for_webapi
+	setup_router_and_filter_for_webapi
 		local
 			l_api: like api
 			l_router: like router
 			l_module: CMS_MODULE
+			f, l_filter, l_last_filter: WSF_FILTER
 		do
 			l_api := api
 			l_router := router
@@ -160,6 +169,20 @@ feature -- Settings: router
 
 				-- Configure root of api handler.
 			l_router.set_base_url (l_api.webapi_path (Void))
+
+				-- Find insertion location for new filter
+				-- i.e just before the CMS_EXECUTION filter.
+			from
+				l_filter := filter
+			until
+				l_last_filter /= Void or not attached l_filter.next as l_next_filter
+			loop
+				if l_next_filter.next = Void then
+					l_last_filter := l_next_filter
+				else
+					l_filter := l_next_filter
+				end
+			end
 
 				-- Include routes from modules.
 			across
@@ -172,24 +195,51 @@ feature -- Settings: router
 					attached l_webapi.module_webapi as wapi
 				then
 					wapi.setup_router (l_router, l_api)
+					if attached wapi.filters (l_api) as l_filters then
+						across
+							l_filters as f_ic
+						loop
+							f := f_ic.item
+							l_filter.set_next (f)
+							f.set_next (l_last_filter)
+						end
+					end
 				end
 			end
 		end
 
-	setup_router_for_administration
+	setup_router_and_filter_for_administration
 			-- <Precursor>
 		local
 			l_api: like api
 			l_router: like router
 			l_module: CMS_MODULE
+			f, l_filter, l_last_filter: WSF_FILTER
 		do
 			l_api := api
 			l_router := router
 
-			l_api.logger.put_debug (generator + ".setup_router_for_administration", Void)
+			l_api.logger.put_debug (generator + ".setup_router_and_filter_for_administration", Void)
 
 				-- Configure root of api handler.
 			l_router.set_base_url (l_api.administration_path (Void))
+
+				-- Apply normal filters
+			setup_filter
+
+				-- Find insertion location for new filter
+				-- i.e just before the CMS_EXECUTION filter.
+			from
+				l_filter := filter
+			until
+				l_last_filter /= Void or not attached l_filter.next as l_next_filter
+			loop
+				if l_next_filter.next = Void then
+					l_last_filter := l_next_filter
+				else
+					l_filter := l_next_filter
+				end
+			end
 
 				-- Include routes from modules.
 			across
@@ -200,15 +250,24 @@ feature -- Settings: router
 					l_module.is_initialized
 				then
 					if
-						attached {CMS_ADMINISTRABLE} l_module as l_administration and then
+						attached {CMS_WITH_MODULE_ADMINISTRATION} l_module as l_administration and then
 						attached l_administration.module_administration as adm
 					then
 						adm.setup_router (l_router, l_api)
-					elseif
-						attached {CMS_WITH_WEBAPI} l_module as l_wapi and then
-						attached l_wapi.module_webapi as wapi
-					then
-						wapi.setup_router (l_router, l_api)
+						if attached adm.filters (l_api) as l_filters then
+							across
+								l_filters as f_ic
+							loop
+								f := f_ic.item
+								l_filter.set_next (f)
+								f.set_next (l_last_filter)
+							end
+						end
+--					elseif
+--						attached {CMS_WITH_WEBAPI} l_module as l_wapi and then
+--						attached l_wapi.module_webapi as wapi
+--					then
+--						wapi.setup_router (l_router, l_api)
 					end
 				end
 			end
@@ -283,6 +342,7 @@ feature -- Request execution
 		do
 			api.switch_to_site_mode
 			api.initialize_execution
+			setup_filter
 			setup_router
 		end
 
@@ -291,7 +351,7 @@ feature -- Request execution
 		do
 			api.switch_to_webapi_mode
 			api.initialize_execution
-			setup_router_for_webapi
+			setup_router_and_filter_for_webapi
 		end
 
 	initialize_administration_execution
@@ -299,7 +359,7 @@ feature -- Request execution
 		do
 			api.switch_to_administration_mode
 			api.initialize_execution
-			setup_router_for_administration
+			setup_router_and_filter_for_administration
 		end
 
 	execute
@@ -341,6 +401,36 @@ feature -- Filters
 --			f.set_next (l_filter)
 --			l_filter := f
 
+--				-- Include filters from modules
+--			across
+--				modules as ic
+--			loop
+--				l_module := ic.item
+--				if
+--					l_module.is_enabled and then
+--					attached l_module.filters (l_api) as l_m_filters
+--				then
+--					across l_m_filters as f_ic loop
+--						f := f_ic.item
+--						l_filter.append (f)
+----						f.set_next (l_filter)
+----						l_filter := f
+--					end
+--				end
+--			end
+
+			filter := l_filter
+		end
+
+	setup_filter
+			-- Setup `filter'.
+		local
+			f, l_filter: detachable WSF_FILTER
+			l_module: CMS_MODULE
+			l_api: like api
+		do
+			l_api := api
+			l_filter := filter
 				-- Include filters from modules
 			across
 				modules as ic
@@ -352,18 +442,13 @@ feature -- Filters
 				then
 					across l_m_filters as f_ic loop
 						f := f_ic.item
-						f.set_next (l_filter)
-						l_filter := f
+						l_filter.append (f)
+--						f.set_next (l_filter)
+--						l_filter := f
 					end
 				end
 			end
-
 			filter := l_filter
-		end
-
-	setup_filter
-			-- Setup `filter'.
-		do
 		end
 
 feature -- Execution

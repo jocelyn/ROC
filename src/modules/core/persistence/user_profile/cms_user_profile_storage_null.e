@@ -24,6 +24,11 @@ feature -- Access
 		do
 		end
 
+	users_with_profile_item (a_item_name: READABLE_STRING_GENERAL; a_value: detachable READABLE_STRING_GENERAL): detachable LIST [CMS_USER]
+			-- <Precursor>
+		do
+		end
+
 feature -- Change
 
 	save_user_profile (a_user: CMS_USER; a_profile: CMS_USER_PROFILE)
@@ -31,4 +36,7 @@ feature -- Change
 		do
 		end
 
+note
+	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

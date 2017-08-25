@@ -31,6 +31,12 @@ feature -- Access
 			end
 		end
 
+	users_with_profile_item (a_item_name: READABLE_STRING_GENERAL; a_value: detachable READABLE_STRING_GENERAL): detachable LIST [CMS_USER]
+			-- Users having a profile item `a_item_name:a_value`.
+			-- Note: if `a_value` is Void, return users having a profile item named `a_item_name`.
+		deferred
+		end
+
 feature -- Change
 
 	save_user_profile (a_user: CMS_USER; a_profile: CMS_USER_PROFILE)
@@ -54,4 +60,7 @@ feature -- Change
 			save_user_profile (a_user, pf)
 		end
 
+note
+	copyright: "2011-2017, Jocelyn Fiat, Javier Velilla, Eiffel Software and others"
+	license: "Eiffel Forum License v2 (see http://www.eiffel.com/licensing/forum.txt)"
 end

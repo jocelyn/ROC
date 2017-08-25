@@ -118,6 +118,16 @@ feature -- Access: user
 			Result := user_storage.user_by_name (a_username)
 		end
 
+	user_by_id_or_name (a_uid: READABLE_STRING_GENERAL): detachable CMS_USER
+			-- User by id or name `a_uid`, if any.
+		do
+			if a_uid.is_integer_64 then
+				Result := user_by_id (a_uid.to_integer_64)
+			else
+				Result := user_by_name (a_uid)
+			end
+		end
+
 	user_by_email (a_email: READABLE_STRING_GENERAL): detachable CMS_USER
 			-- User by email `a_email', if any.
 		do
